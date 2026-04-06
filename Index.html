@@ -723,43 +723,43 @@ body { font-family:'PPPangramSans',Arial,sans-serif; font-weight:400; background
             <tr>
               <td>Toronto &#x2192; Niagara Falls</td>
               <td>Standard</td>
-              <td class="hsr-val">~52 min</td>
+              <td class="hsr-val">~48 min</td>
               <td>90–120 min</td>
             </tr>
             <tr>
               <td>Toronto &#x2192; Kitchener</td>
-              <td>Standard <span class="svc-info" title="Stops at Pearson Airport">i</span></td>
-              <td class="hsr-val">~42 min</td>
+              <td>Standard</td>
+              <td class="hsr-val">~38 min</td>
               <td>90–120 min</td>
             </tr>
             <tr>
               <td>Toronto &#x2192; Kitchener</td>
               <td>Express <span class="svc-info" title="Skips Pearson Airport station">i</span></td>
-              <td class="hsr-val">~38 min</td>
+              <td class="hsr-val">~26 min</td>
               <td>90–120 min</td>
             </tr>
             <tr>
               <td>Toronto &#x2192; Windsor</td>
-              <td>Standard <span class="svc-info" title="Stops at Pearson and Chatham">i</span></td>
-              <td class="hsr-val">~2h 06m</td>
+              <td>Standard</td>
+              <td class="hsr-val">~2h 00m</td>
               <td>~4h</td>
             </tr>
             <tr>
               <td>Toronto &#x2192; Windsor</td>
               <td>Express <span class="svc-info" title="Skips Pearson Airport and Chatham stations">i</span></td>
-              <td class="hsr-val">~1h 58m</td>
+              <td class="hsr-val">~1h 40m</td>
               <td>~4h</td>
             </tr>
             <tr>
               <td>Barrie &#x2192; Hamilton</td>
-              <td>Standard <span class="svc-info" title="Stops at Pearson">i</span></td>
-              <td class="hsr-val">~56 min</td>
+              <td>Standard</td>
+              <td class="hsr-val">~50 min</td>
               <td>~95–110 min</td>
             </tr>
             <tr>
               <td>London &#x2192; Pearson</td>
               <td>Standard</td>
-              <td class="hsr-val">~57 min</td>
+              <td class="hsr-val">~55 min</td>
               <td>~2h</td>
             </tr>
             <tr>
@@ -771,13 +771,13 @@ body { font-family:'PPPangramSans',Arial,sans-serif; font-weight:400; background
             <tr>
               <td>Oshawa &#x2192; Hamilton</td>
               <td>Standard</td>
-              <td class="hsr-val">~48 min</td>
+              <td class="hsr-val">~44 min</td>
               <td>~90–120 min</td>
             </tr>
             <tr>
               <td>Oshawa &#x2192; Kitchener</td>
               <td>Standard</td>
-              <td class="hsr-val">~1h 06m</td>
+              <td class="hsr-val">~65 min</td>
               <td>~110–140 min</td>
             </tr>
           </tbody>
@@ -1005,11 +1005,6 @@ L.polyline([C.oshawa,C.peterborough,C.ottawa],{color:ALTO,weight:4,opacity:0.72,
 const stations = [
 
   // ── PEARSON (Core Hub · 4 connections) ──
-  // Direct: Toronto 12m, KW 26m, Hamilton 21m, Barrie 31m
-  // Oshawa: 12 + 4(Toronto) + 24 = 40m
-  // London: 26 + 4(KW) + 27 = 57m
-  // Niagara: 21 + 4(Hamilton) + 28 = 53m
-  // Windsor: 26 + 4(KW) + 27 + 4(London) + 25 + 20 = 106m
   {name:'Pearson International', coords:C.pearson, tier:'core', r:14, dir:'right', proposed:false,
    connections:4, sub:'Core Hub \u00b7 4 Connections',
    serves:['Windsor\u2013Oshawa spine','Hamilton branch','Barrie spur','Toronto Union stub'],
@@ -1020,18 +1015,13 @@ const stations = [
      ['Kitchener',        '26m'],
      ['Hamilton',         '21m'],
      ['Barrie',           '31m'],
-     ['Oshawa',           '40m'],
-     ['London',           '57m'],
-     ['Niagara Falls',    '53m'],
-     ['Windsor',          '1h 46m'],
+     ['Oshawa',           '36m'],
+     ['London',           '53m'],
+     ['Niagara Falls',    '49m'],
+     ['Windsor',          '1h 38m'],
    ]},
 
   // ── HAMILTON (Core Hub · 4 connections) ──
-  // Direct: Niagara 28m, Pearson 21m, KW 18m, Toronto 20m
-  // Barrie: 21 + 0(Pearson skip) + 31 = 52m
-  // Oshawa: 20 + 4(Toronto) + 24 = 48m
-  // London: 18 + 4(KW) + 27 = 49m
-  // Windsor: 18 + 4(KW) + 27 + 4(London) + 25 + 20 = 98m
   {name:'Hamilton', coords:C.hamilton, tier:'core', r:14, dir:'bottom', proposed:false,
    connections:4, sub:'Core Hub \u00b7 4 Connections',
    serves:['Toronto\u2013Niagara branch','Pearson\u2013Hamilton branch','Hamilton\u2013Kitchener branch','Niagara corridor'],
@@ -1043,17 +1033,12 @@ const stations = [
      ['Kitchener',        '18m'],
      ['Toronto Union',    '20m'],
      ['Barrie',           '52m'],
-     ['Oshawa',           '48m'],
-     ['London',           '49m'],
-     ['Windsor',          '1h 38m'],
+     ['Oshawa',           '44m'],
+     ['London',           '45m'],
+     ['Windsor',          '1h 30m'],
    ]},
 
   // ── TORONTO (Major Hub · 3 connections) ──
-  // Direct: Pearson 12m, Oshawa 24m, Hamilton 20m
-  // Niagara: 20 + 4(Hamilton) + 28 = 52m
-  // KW: 12 + 0(Pearson skip) + 26 = 38m
-  // London: 12 + 0(Pearson) + 26 + 4(KW) + 27 = 69m
-  // Windsor: 12 + 0(Pearson) + 26 + 4(KW) + 27 + 4(London) + 25 + 20 = 118m
   {name:'Toronto Union / East Harbour', coords:C.toronto, tier:'major', r:12, dir:'top', proposed:false,
    connections:3, sub:'Major Hub \u00b7 3 Connections',
    serves:['Windsor\u2013Oshawa spine','Toronto\u2013Niagara branch','Project Alto (via Oshawa)'],
@@ -1063,21 +1048,15 @@ const stations = [
      ['Pearson',          '12m'],
      ['Oshawa',           '24m'],
      ['Hamilton',         '20m'],
-     ['Niagara Falls',    '52m'],
+     ['Niagara Falls',    '48m'],
      ['Kitchener',        '38m'],
-     ['London',           '1h 09m'],
-     ['Windsor',          '1h 58m'],
+     ['London',           '1h 05m'],
+     ['Windsor',          '1h 50m'],
      ['Peterborough (Alto)','~31m'],
      ['Ottawa (Alto)',    '~2h 05m'],
    ]},
 
   // ── KITCHENER (Major Hub · 3 connections) ──
-  // Direct: Hamilton 18m, London 27m, Pearson 26m
-  // Toronto: 26 + 0(Pearson skip) + 12 = 38m
-  // Niagara: 18 + 4(Hamilton) + 28 = 50m
-  // Windsor: 27 + 4(London) + 25 + 20 = 76m
-  // Barrie: 26 + 0(Pearson skip) + 31 = 57m
-  // Oshawa: 26 + 0(Pearson) + 12 + 4(Toronto) + 24 = 66m
   {name:'Kitchener\u2013Waterloo', coords:C.kitchener, tier:'major', r:12, dir:'left', proposed:false,
    connections:3, sub:'Major Hub \u00b7 3 Connections',
    serves:['Windsor\u2013Oshawa spine','Hamilton\u2013Kitchener branch','London corridor'],
@@ -1088,20 +1067,13 @@ const stations = [
      ['London',           '27m'],
      ['Pearson',          '26m'],
      ['Toronto Union',    '38m'],
-     ['Niagara Falls',    '50m'],
-     ['Windsor',          '1h 16m'],
+     ['Niagara Falls',    '46m'],
+     ['Windsor',          '1h 12m'],
      ['Barrie',           '57m'],
-     ['Oshawa',           '1h 06m'],
+     ['Oshawa',           '1h 02m'],
    ]},
 
   // ── OSHAWA (Regional · 2 connections) ──
-  // Direct: Toronto 24m
-  // Pearson: 24 + 4(Toronto) + 12 = 40m
-  // Hamilton: 24 + 4(Toronto) + 20 = 48m
-  // Niagara: 24 + 4(Toronto) + 20 + 4(Hamilton) + 28 = 80m
-  // KW: 24 + 4(Toronto) + 12 + 0(Pearson) + 26 = 66m
-  // London: 24 + 4(Toronto) + 12 + 0(Pearson) + 26 + 4(KW) + 27 = 97m
-  // Windsor: 24 + 4 + 12 + 0 + 26 + 4 + 27 + 4 + 25 + 20 = 146m
   {name:'Oshawa', coords:C.oshawa, tier:'regional', r:9, dir:'right', proposed:false,
    connections:2, sub:'Regional \u00b7 2 Connections',
    serves:['Windsor\u2013Oshawa spine','Project Alto (Peterborough\u2013Ottawa)'],
@@ -1109,22 +1081,17 @@ const stations = [
    chatham:false,
    times:[
      ['Toronto Union',    '24m'],
-     ['Pearson',          '40m'],
-     ['Hamilton',         '48m'],
-     ['Niagara Falls',    '1h 20m'],
-     ['Kitchener',        '1h 06m'],
-     ['London',           '1h 37m'],
-     ['Windsor',          '2h 26m'],
+     ['Pearson',          '36m'],
+     ['Hamilton',         '44m'],
+     ['Niagara Falls',    '1h 12m'],
+     ['Kitchener',        '1h 02m'],
+     ['London',           '1h 29m'],
+     ['Windsor',          '2h 14m'],
      ['Peterborough (Alto)','~20m'],
      ['Ottawa (Alto)',    '~1h 25m'],
    ]},
 
   // ── LONDON (Regional · 2 connections) ──
-  // Direct: KW 27m, Windsor 25+20=45m (Chatham skip)
-  // Pearson: 27 + 4(KW) + 26 = 57m
-  // Toronto: 27 + 4(KW) + 26 + 0(Pearson) + 12 = 69m
-  // Hamilton: 27 + 4(KW) + 18 = 49m
-  // Niagara: 27 + 4(KW) + 18 + 4(Hamilton) + 28 = 81m
   {name:'London', coords:C.london, tier:'regional', r:9, dir:'left', proposed:false,
    connections:2, sub:'Regional \u00b7 2 Connections', serves:['Windsor\u2013Oshawa spine','Kitchener\u2013Windsor corridor'],
    note:'Local rapid transit hub. Regional bus feeder to surrounding communities.',
@@ -1132,10 +1099,10 @@ const stations = [
    times:[
      ['Kitchener',        '27m'],
      ['Windsor',          '45m'],
-     ['Pearson',          '57m'],
-     ['Toronto Union',    '1h 09m'],
-     ['Hamilton',         '49m'],
-     ['Niagara Falls',    '1h 21m'],
+     ['Pearson',          '53m'],
+     ['Toronto Union',    '1h 05m'],
+     ['Hamilton',         '45m'],
+     ['Niagara Falls',    '1h 13m'],
    ]},
 
   // ── CHATHAM (Regional · express skip — regional times) ──
@@ -1151,52 +1118,34 @@ const stations = [
    ]},
 
   // ── WINDSOR (Regional · 1 connection) ──
-  // Direct: London 20+25=45m (Chatham skip)
-  // KW: 20 + 25 + 4(London) + 27 = 76m
-  // Pearson: 20 + 25 + 4(London) + 27 + 4(KW) + 26 = 106m
-  // Toronto: 20 + 25 + 4(London) + 27 + 4(KW) + 26 + 0(Pearson) + 12 = 118m
-  // Hamilton: 20 + 25 + 4(London) + 27 + 4(KW) + 18 = 98m
-  // Oshawa: 20 + 25 + 4 + 27 + 4 + 26 + 0 + 12 + 4 + 24 = 146m
   {name:'Windsor', coords:C.windsor, tier:'regional', r:9, dir:'left', proposed:false,
    connections:1, sub:'Regional \u00b7 Western Terminus', serves:['Windsor\u2013Oshawa spine'],
    note:'Cross-border connection to Detroit. Western anchor.',
    chatham:false,
    times:[
      ['London',           '45m'],
-     ['Kitchener',        '1h 16m'],
-     ['Pearson',          '1h 46m'],
-     ['Toronto Union',    '1h 58m'],
-     ['Hamilton',         '1h 38m'],
-     ['Oshawa',           '2h 26m'],
+     ['Kitchener',        '1h 12m'],
+     ['Pearson',          '1h 38m'],
+     ['Toronto Union',    '1h 50m'],
+     ['Hamilton',         '1h 30m'],
+     ['Oshawa',           '2h 14m'],
    ]},
 
   // ── NIAGARA FALLS (Regional · 1 connection) ──
-  // Direct: Hamilton 28m
-  // Pearson: 28 + 4(Hamilton) + 21 = 53m
-  // KW: 28 + 4(Hamilton) + 18 = 50m
-  // Toronto: 28 + 4(Hamilton) + 20 = 52m
-  // Oshawa: 28 + 4(Hamilton) + 20 + 4(Toronto) + 24 = 80m
-  // London: 28 + 4(Hamilton) + 18 + 4(KW) + 27 = 81m
   {name:'Niagara Falls', coords:C.niagara, tier:'regional', r:9, dir:'bottom', proposed:false,
    connections:1, sub:'Regional \u00b7 Southern Terminus', serves:['Toronto\u2013Niagara'],
    note:'Tourism and cross-border traffic. Southern anchor.',
    chatham:false,
    times:[
      ['Hamilton',         '28m'],
-     ['Pearson',          '53m'],
-     ['Kitchener',        '50m'],
-     ['Toronto Union',    '52m'],
-     ['Oshawa',           '1h 20m'],
-     ['London',           '1h 21m'],
+     ['Pearson',          '49m'],
+     ['Kitchener',        '46m'],
+     ['Toronto Union',    '48m'],
+     ['Oshawa',           '1h 12m'],
+     ['London',           '1h 13m'],
    ]},
 
   // ── BARRIE (Regional · 1 connection) ──
-  // Direct: Pearson 31m
-  // Toronto: 31 + 0(Pearson skip) + 12 = 43m
-  // Hamilton: 31 + 0(Pearson skip) + 21 = 52m
-  // KW: 31 + 0(Pearson skip) + 26 = 57m
-  // Niagara: 31 + 0(Pearson) + 21 + 4(Hamilton) + 28 = 84m
-  // London: 31 + 0(Pearson) + 26 + 4(KW) + 27 = 88m
   {name:'Barrie', coords:C.barrie, tier:'regional', r:9, dir:'right', proposed:false,
    connections:1, sub:'Regional \u00b7 Northern Terminus', serves:['Pearson\u2013Barrie'],
    note:'Northern anchor. Simcoe County gateway.',
@@ -1206,8 +1155,8 @@ const stations = [
      ['Toronto Union',    '43m'],
      ['Hamilton',         '52m'],
      ['Kitchener',        '57m'],
-     ['Niagara Falls',    '1h 24m'],
-     ['London',           '1h 28m'],
+     ['Niagara Falls',    '1h 20m'],
+     ['London',           '1h 24m'],
    ]},
 ];
 
