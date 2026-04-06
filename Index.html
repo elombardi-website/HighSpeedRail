@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Southern Ontario HSR + Project Alto</title>
+<title>Southern Ontario High-Speed Rail Alternative</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>
@@ -16,7 +16,7 @@
 :root {
   --ph1:    #E81E25;
   --ph2:    #2D2D2D;
-  --alto:   #1A6FA8;
+  --alto:   #228B22;
   --bg:     #F2F4F7;
   --black:  #101010;
   --grey:   #2D2D2D;
@@ -24,55 +24,158 @@
   --amber:  #C27B0A;
 }
 
-* { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:'PPPangramSans',Arial,sans-serif; font-weight:400; background:#d4dde8; }
-#map { width:100vw; height:100vh; }
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'PPPangramSans',Arial,sans-serif; font-weight:400; background:#d4dde8; height:100vh; overflow:hidden; }
+#map { width:100%; height:100vh; }
 
-/* ── Panel base ────────────────────────────────────────────── */
-.panel {
-  position:absolute; z-index:1000;
-  background:rgba(242,244,247,0.97); border:1px solid var(--border);
-  border-radius:10px; padding:12px 16px;
-  box-shadow:0 2px 14px rgba(0,0,0,0.13);
+/* ── Overview button (top-right) ── */
+#info-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 1000;
+  height: 40px;
+  padding: 0 18px;
+  border-radius: 20px;
+  background: #E81E25;
+  color: #F2F4F7;
+  border: none;
+  font-family:'PPPangramSans',Arial,sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 12px rgba(232,30,37,0.4);
+  transition: background 0.18s, transform 0.12s;
 }
-.panel h1 { font-family:'PPWatch',Impact,sans-serif; font-weight:700; font-size:18px; color:var(--black); letter-spacing:.01em; margin-bottom:4px; line-height:1.1; text-transform:uppercase; }
-.panel p  { font-size:11px; color:#888; font-weight:400; }
-.lbl { font-family:'PPPangramSans',Arial,sans-serif; font-weight:700; font-size:9px; text-transform:uppercase; letter-spacing:.1em; color:#999; }
+#info-btn:hover { background: #c9191f; transform: scale(1.07); }
 
-/* ── Collapsible panels ────────────────────────────────────── */
-.panel-header {
-  display:flex; align-items:center; justify-content:space-between;
-  cursor:pointer; user-select:none; -webkit-tap-highlight-color:transparent;
+/* ── Legend ── */
+#legend {
+  position: absolute;
+  bottom: 28px;
+  right: 10px;
+  z-index: 1000;
+  background: rgba(242,244,247,0.97);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 14px 16px 16px;
+  box-shadow: 0 4px 22px rgba(0,0,0,0.14);
+  min-width: 210px;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
 }
-.panel-chevron { font-size:13px; color:#aaa; transition:transform .2s; margin-left:8px; line-height:1; flex-shrink:0; }
-.panel.collapsed .panel-chevron { transform:rotate(-90deg); }
-.panel.collapsed .panel-body { display:none; }
-.panel-body { margin-top:8px; }
 
-/* ── Toggle switch ─────────────────────────────────────────── */
-.toggle-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; font-size:12px; color:var(--grey); font-weight:500; gap:10px; }
-.tog { position:relative; width:34px; height:18px; flex-shrink:0; }
-.tog input { opacity:0; width:0; height:0; }
-.sl { position:absolute; inset:0; background:#ccc; border-radius:18px; cursor:pointer; transition:.2s; }
-.sl:before { content:''; position:absolute; width:14px; height:14px; left:2px; top:2px; background:#fff; border-radius:50%; transition:.2s; }
-input:checked+.sl { background:var(--ph1); }
-input:checked+.sl:before { transform:translateX(16px); }
+.legend-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
 
-/* ── Legend ────────────────────────────────────────────────── */
-.legend { bottom:20px; left:14px; max-width:285px; }
-.ls { margin-bottom:12px; }
-.lr { display:flex; align-items:center; gap:9px; margin-bottom:6px; font-size:11px; color:var(--grey); line-height:1.3; font-weight:400; }
-.ll { width:26px; height:5px; border-radius:3px; flex-shrink:0; }
-.ld { width:13px; height:13px; border-radius:50%; border:2px solid rgba(0,0,0,.22); flex-shrink:0; }
+.legend-title {
+  font-family:'PPPangramSans',Arial,sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  color: #101010;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
 
-/* ── Leaflet popup ─────────────────────────────────────────── */
+#legend-toggle {
+  background: none;
+  border: none;
+  font-size: 13px;
+  color: #9ca3af;
+  cursor: pointer;
+  display: none;
+  padding: 0 2px;
+}
+
+.legend-section {
+  font-family:'PPPangramSans',Arial,sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  color: #2D2D2D;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin: 10px 0 5px;
+}
+
+.legend-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+}
+
+.legend-row span {
+  font-size: 12px;
+  color: #2D2D2D;
+  line-height: 1.3;
+}
+
+.l-dot {
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.85);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+}
+
+.l-line {
+  flex-shrink: 0;
+  height: 3px;
+  border-radius: 2px;
+  width: 26px;
+}
+
+.l-line-dashed {
+  flex-shrink: 0;
+  width: 26px;
+  height: 0;
+  border-top: 3px dashed #228B22;
+}
+
+.speed-box {
+  margin-top: 6px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px 8px;
+}
+
+.speed-row {
+  font-size: 11px;
+  color: #2D2D2D;
+  line-height: 1.5;
+}
+
+.speed-row strong {
+  color: #101010;
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.design-speed {
+  font-size: 11px;
+  color: #2D2D2D;
+  margin-bottom: 4px;
+}
+
+.design-speed strong { color: #101010; }
+
+/* ── Leaflet popup overrides ── */
 .leaflet-popup-content-wrapper {
   background:rgba(242,244,247,0.98) !important; border:1px solid var(--border) !important;
   border-radius:10px !important; box-shadow:0 6px 24px rgba(0,0,0,.16) !important; color:var(--grey) !important;
 }
 .leaflet-popup-tip { background:rgba(242,244,247,0.98) !important; }
 .leaflet-popup-content { margin:14px 18px !important; min-width:220px; font-family:'PPPangramSans',Arial,sans-serif; }
+.leaflet-control-attribution { font-size: 10px; }
 
+/* ── Popup classes ── */
 .pu-title { font-family:'PPWatch',Impact,sans-serif; font-weight:700; font-size:17px; color:var(--black); text-transform:uppercase; letter-spacing:.02em; line-height:1.1; margin-bottom:2px; }
 .pu-sub   { font-weight:700; font-size:9px; color:#999; text-transform:uppercase; letter-spacing:.09em; margin-bottom:10px; }
 .pu-section { font-weight:700; font-size:9px; text-transform:uppercase; letter-spacing:.09em; color:#999; margin:10px 0 6px; border-top:1px solid var(--border); padding-top:8px; }
@@ -93,7 +196,7 @@ input:checked+.sl:before { transform:translateX(16px); }
 .pu-badge { display:inline-block; font-weight:700; font-size:9px; padding:2px 9px; border-radius:12px; margin-top:8px; letter-spacing:.06em; text-transform:uppercase; margin-right:4px; }
 .pu-proposed { font-weight:700; font-size:9px; letter-spacing:.06em; text-transform:uppercase; color:#854d0e; background:#fef9c3; border:1px solid #fde047; border-radius:6px; padding:2px 8px; display:inline-block; margin-bottom:8px; }
 
-/* ── Station / Alto labels ─────────────────────────────────── */
+/* ── Station / Alto labels ── */
 .station-label {
   background:transparent !important; border:none !important; box-shadow:none !important;
   font-family:'PPPangramSans',Arial,sans-serif !important; font-weight:700 !important;
@@ -109,133 +212,682 @@ input:checked+.sl:before { transform:translateX(16px); }
 }
 .alto-label::before { display:none !important; }
 
-/* ── Speed info box ────────────────────────────────────────── */
-.info-box {
-  background:rgba(242,244,247,0.96); border:1px solid var(--border);
-  border-radius:10px; padding:11px 15px; font-family:'PPPangramSans',Arial,sans-serif;
-  font-size:11px; color:#444; box-shadow:0 2px 12px rgba(0,0,0,.1);
+/* ── Modal overlay ── */
+#modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(10, 15, 30, 0.65);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: fadeIn 0.22s ease;
 }
 
-/* ── Mobile ────────────────────────────────────────────────── */
-@media (max-width:639px) {
-  .panel h1 { font-size:15px; }
-  .panel p  { font-size:10px; }
+#modal-overlay.hidden { display: none; }
 
-  /* Wider touch targets */
-  .tog { width:40px; height:22px; }
-  .sl:before { width:18px; height:18px; }
-  input:checked+.sl:before { transform:translateX(18px); }
-  .toggle-row { font-size:13px; }
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
 
-  /* Constrain panel widths to viewport */
-  #layersPanel { min-width:unset !important; max-width:calc(100vw - 28px); }
-  .legend      { max-width:calc(100vw - 28px) !important; }
+#modal {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 28px 90px rgba(0,0,0,0.38);
+  max-width: 680px;
+  width: 100%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideUp 0.25s ease;
+}
 
-  /* Hide speed info — too much on small screens */
-  .info-box { display:none !important; }
+@keyframes slideUp {
+  from { transform: translateY(18px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.modal-top {
+  padding: 28px 28px 0;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.modal-badge {
+  display: inline-block;
+  background: #DFE1E4;
+  color: #2D2D2D;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 100px;
+  margin-bottom: 12px;
+}
+
+.modal-title {
+  font-family:'PPWatch',Impact,sans-serif;
+  font-size: 24px;
+  font-weight: 800;
+  color: #101010;
+  line-height: 1.2;
+  margin-bottom: 8px;
+}
+
+.modal-exploring {
+  font-size: 12px;
+  font-weight: 600;
+  color: #E81E25;
+  margin-bottom: 10px;
+}
+
+.modal-lead {
+  font-size: 14px;
+  color: #2D2D2D;
+  line-height: 1.65;
+  margin-bottom: 20px;
+}
+
+.modal-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #DFE1E4;
+  border: none;
+  font-size: 16px;
+  color: #2D2D2D;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+.modal-close:hover { background: #c8cacd; color: #101010; }
+
+.modal-ctas {
+  display: flex;
+  gap: 10px;
+  padding: 0 28px 20px;
+  flex-wrap: wrap;
+}
+
+.btn-explore {
+  flex: 1;
+  min-width: 140px;
+  padding: 13px 20px;
+  background: #E81E25;
+  color: #F2F4F7;
+  border: none;
+  border-radius: 10px;
+  font-family:'PPPangramSans',Arial,sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.18s, transform 0.1s;
+}
+.btn-explore:hover { background: #c9191f; transform: translateY(-1px); }
+
+.btn-site {
+  flex: 1;
+  min-width: 140px;
+  padding: 13px 20px;
+  background: #F2F4F7;
+  color: #101010;
+  border: 1.5px solid #DFE1E4;
+  border-radius: 10px;
+  font-family:'PPPangramSans',Arial,sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background 0.15s;
+}
+.btn-site:hover { background: #DFE1E4; }
+
+.modal-tabs {
+  display: flex;
+  padding: 0 28px;
+  border-bottom: 1.5px solid #DFE1E4;
+  gap: 2px;
+  overflow-x: auto;
+  flex-shrink: 0;
+}
+.modal-tabs::-webkit-scrollbar { height: 0; }
+
+.tab-btn {
+  padding: 10px 14px;
+  background: none;
+  border: none;
+  border-bottom: 2.5px solid transparent;
+  margin-bottom: -1.5px;
+  font-family:'PPPangramSans',Arial,sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #2D2D2D;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.15s;
+}
+.tab-btn:hover { color: #101010; }
+.tab-btn.active { color: #E81E25; font-weight: 700; border-bottom-color: #E81E25; }
+
+.modal-body {
+  overflow-y: auto;
+  padding: 24px 28px 28px;
+  flex: 1;
+}
+
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
+
+.tab-pane p {
+  font-size: 14px;
+  color: #2D2D2D;
+  line-height: 1.75;
+  margin-bottom: 14px;
+}
+
+.tab-pane h3 {
+  font-size: 15px;
+  font-weight: 700;
+  color: #101010;
+  margin: 22px 0 10px;
+}
+.tab-pane h3:first-child { margin-top: 0; }
+
+.choice-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin: 14px 0 18px;
+}
+
+.choice-card {
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.choice-card.tunnel {
+  background: #F2F4F7;
+  border: 1px solid #DFE1E4;
+}
+
+.choice-card.hsr {
+  background: #F2F4F7;
+  border: 1px solid #E81E25;
+}
+
+.choice-card-title {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.choice-card.tunnel .choice-card-title { color: #101010; }
+.choice-card.hsr   .choice-card-title { color: #E81E25; }
+
+.choice-card ul {
+  list-style: none;
+  padding: 0;
+}
+
+.choice-card li {
+  font-size: 12px;
+  color: #2D2D2D;
+  line-height: 1.55;
+  padding: 3px 0 3px 14px;
+  position: relative;
+}
+
+.choice-card li::before {
+  content: '–';
+  position: absolute;
+  left: 0;
+  color: #2D2D2D;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.data-table th {
+  background: #DFE1E4;
+  text-align: left;
+  padding: 8px 10px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: #2D2D2D;
+  border-bottom: 1.5px solid #DFE1E4;
+}
+
+.data-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #DFE1E4;
+  color: #2D2D2D;
+  vertical-align: middle;
+}
+
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: #F2F4F7; }
+
+.hsr-val {
+  font-weight: 700;
+  color: #E81E25;
+}
+
+.cost-total-row td {
+  font-weight: 700;
+  color: #101010;
+  background: #DFE1E4;
+}
+
+.cost-note {
+  font-size: 12px;
+  color: #2D2D2D;
+  line-height: 1.65;
+  margin-top: 4px;
+  list-style: none;
+  padding: 0;
+}
+
+.cost-note li {
+  padding: 3px 0 3px 14px;
+  position: relative;
+}
+
+.cost-note li::before {
+  content: '·';
+  position: absolute;
+  left: 0;
+  color: #2D2D2D;
+  font-weight: 700;
+}
+
+.svc-info {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #DFE1E4;
+  color: #2D2D2D;
+  font-size: 9px;
+  font-weight: 700;
+  font-style: normal;
+  cursor: help;
+  margin-left: 3px;
+  vertical-align: middle;
+  user-select: none;
+}
+
+.byline {
+  font-size: 12px;
+  color: #2D2D2D;
+  font-style: italic;
+  margin-top: 6px;
+}
+
+/* ── Mobile ── */
+@media (max-width: 600px) {
+  .modal-title { font-size: 19px; }
+
+  .modal-top,
+  .modal-ctas,
+  .modal-body { padding-left: 18px; padding-right: 18px; }
+
+  .modal-tabs { padding: 0 18px; }
+
+  .choice-grid { grid-template-columns: 1fr; }
+
+  #legend {
+    bottom: 10px;
+    right: 6px;
+    min-width: 170px;
+    max-height: 42vh;
+    padding: 10px 12px 12px;
+  }
+
+  #legend-toggle { display: block; }
 }
 </style>
 </head>
 <body>
 
-<!-- Title panel -->
-<div class="panel" style="top:14px;left:14px">
-  <h1>Southern Ontario HSR<br>+ Project Alto</h1>
-  <p>Proposed network · express journey times</p>
-</div>
-
-<!-- Layers panel -->
-<div class="panel" id="layersPanel" style="top:14px;right:14px;min-width:220px">
-  <div class="panel-header" onclick="togglePanel('layersPanel')">
-    <h3 class="lbl" style="display:block">Layers</h3>
-    <span class="panel-chevron">▾</span>
-  </div>
-  <div class="panel-body">
-    <div class="toggle-row"><span>Phase 1 — Spine (Windsor–Oshawa)</span>
-      <label class="tog"><input type="checkbox" checked onchange="toggleLayer('ph1',this.checked)"><span class="sl"></span></label></div>
-    <div class="toggle-row"><span>Phase 2 — Branches</span>
-      <label class="tog"><input type="checkbox" checked onchange="toggleLayer('ph2',this.checked)"><span class="sl"></span></label></div>
-    <div class="toggle-row"><span>Project Alto Corridor</span>
-      <label class="tog"><input type="checkbox" checked onchange="toggleLayer('alto',this.checked)"><span class="sl"></span></label></div>
-    <div style="border-top:1px solid var(--border);margin-top:6px;padding-top:10px">
-      <h3 class="lbl" style="display:block;margin-bottom:6px">Tile Style</h3>
-      <select onchange="switchTiles(this.value)" style="width:100%;font-family:'PPPangramSans',Arial,sans-serif;font-size:12px;padding:5px 8px;border:1px solid rgba(0,0,0,.14);border-radius:6px;background:#fff;color:#333;cursor:pointer">
-        <option value="voyager">Voyager (terrain + labels)</option>
-        <option value="positron">Positron (minimal light)</option>
-        <option value="dark">Dark (high contrast)</option>
-        <option value="topo">OpenTopoMap (topographic)</option>
-      </select>
-    </div>
-  </div>
-</div>
-
-<!-- Legend panel -->
-<div class="panel legend" id="legendPanel" style="bottom:20px;left:14px">
-  <div class="panel-header" onclick="togglePanel('legendPanel')">
-    <h3 class="lbl" style="display:block">Legend</h3>
-    <span class="panel-chevron">▾</span>
-  </div>
-  <div class="panel-body">
-    <div class="ls" style="margin-top:4px">
-      <h3 class="lbl" style="display:block;margin-bottom:9px">Phase 1 — Spine</h3>
-      <div class="lr"><div class="ll" style="background:#E81E25"></div>Windsor – Chatham – London – KW – Pearson – Toronto – Oshawa</div>
-    </div>
-    <div class="ls">
-      <h3 class="lbl" style="display:block;margin-bottom:9px">Phase 2 — Branches</h3>
-      <div class="lr"><div class="ll" style="background:#2D2D2D"></div>Toronto – Hamilton – Niagara Falls</div>
-      <div class="lr"><div class="ll" style="background:#2D2D2D"></div>Pearson–Hamilton · Hamilton–KW · Pearson–Barrie</div>
-    </div>
-    <div class="ls">
-      <h3 class="lbl" style="display:block;margin-bottom:9px">Project Alto <span style="font-weight:400;font-style:italic;color:#bbb">(federal)</span></h3>
-      <div class="lr"><div class="ll" style="background:#1A6FA8;opacity:0.75"></div>Toronto – Oshawa – Peterborough – Ottawa</div>
-    </div>
-    <div style="border-top:1px solid var(--border);padding-top:10px">
-      <h3 class="lbl" style="display:block;margin-bottom:8px">Station Tiers</h3>
-      <div class="lr"><div class="ld" style="background:#d4a017;border-color:#a07010"></div>Tier 4 · Pearson, Hamilton (4 connections)</div>
-      <div class="lr"><div class="ld" style="background:#1d6fa4;border-color:#0d4d8c"></div>Tier 3 · Toronto, Kitchener, Oshawa (2–3)</div>
-      <div class="lr"><div class="ld" style="background:#6b7280;border-color:#4b5563"></div>Regional / terminus (1–2 connections)</div>
-    </div>
-    <div style="border-top:1px solid var(--border);margin-top:8px;padding-top:6px;font-size:10px;color:#999">
-      Times = ⚡ express via natural routing.<br>
-      "via X" shown where route passes through a hub.<br>
-      * Oshawa = proposed new station.
-    </div>
-  </div>
-</div>
-
+<!-- ════════════════════════════════════════
+     MAP
+     ════════════════════════════════════════ -->
 <div id="map"></div>
 
+<!-- Overview button -->
+<button id="info-btn" onclick="openModal()" title="About this map" aria-label="Open information panel">Overview</button>
+
+<!-- ════════════════════════════════════════
+     LEGEND
+     ════════════════════════════════════════ -->
+<div id="legend">
+  <div class="legend-header">
+    <div class="legend-title">Map Legend</div>
+    <button id="legend-toggle" onclick="toggleLegend()" aria-label="Toggle legend">&#x25BC;</button>
+  </div>
+
+  <div id="legend-body" class="legend-body">
+
+    <div class="legend-section">Lines</div>
+    <div class="legend-row">
+      <div class="l-line" style="background:#E81E25;"></div>
+      <span>Southern Ontario HSR</span>
+    </div>
+    <div class="legend-row">
+      <div class="l-line" style="background:#101010;"></div>
+      <span>Greater Golden Horseshoe HSR</span>
+    </div>
+    <div class="legend-row">
+      <div class="l-line-dashed"></div>
+      <span>Alto (Federal)</span>
+    </div>
+
+    <div class="legend-section">Station Tiers</div>
+    <div class="legend-row">
+      <div class="l-dot" style="width:18px;height:18px;background:#E81E25;"></div>
+      <span>Core Hub</span>
+    </div>
+    <div class="legend-row">
+      <div class="l-dot" style="width:15px;height:15px;background:#101010;"></div>
+      <span>Major Hub</span>
+    </div>
+    <div class="legend-row">
+      <div class="l-dot" style="width:11px;height:11px;background:#6E6E6E;"></div>
+      <span>Regional</span>
+    </div>
+
+    <div class="legend-section">Speed Assumptions</div>
+    <div class="design-speed"><strong>Design speed:</strong> 320–350 km/h</div>
+    <div class="speed-box">
+      <div class="speed-row"><strong>Rural</strong>230–250 km/h</div>
+      <div class="speed-row"><strong>Mixed</strong>180–220 km/h</div>
+      <div class="speed-row"><strong>Urban</strong>140–170 km/h</div>
+    </div>
+
+  </div><!-- /legend-body -->
+</div>
+
+<!-- ════════════════════════════════════════
+     MODAL
+     ════════════════════════════════════════ -->
+<div id="modal-overlay" role="dialog" aria-modal="true" aria-label="About this map">
+  <div id="modal">
+
+    <!-- Header -->
+    <div style="display:flex;justify-content:flex-end;padding:16px 20px 0;">
+      <button class="modal-close" onclick="closeModal()" aria-label="Close" style="position:static;">&#x2715;</button>
+    </div>
+    <div class="modal-top" style="padding-top:0;">
+      <h1 class="modal-title">A High-Speed Rail Alternative for Southern Ontario</h1>
+      <p class="modal-exploring">Eric Lombardi is exploring a run for Ontario Liberal Party Leader.</p>
+      <p class="modal-lead">Ontario is considering spending <a href="https://www.cbc.ca/news/canada/toronto/401-tunnel-cost-1.7464404" target="_blank" rel="noopener noreferrer" style="color:#E81E25;font-weight:600;">~$100 billion tunnelling under Highway 401</a>. This map explores what a comparable investment could build instead — shared as an idea for public discussion, not a campaign commitment.</p>
+    </div>
+
+    <!-- CTAs -->
+    <div class="modal-ctas">
+      <button class="btn-explore" onclick="closeModal()">Explore the Map &#x2192;</button>
+      <a class="btn-site" href="https://ericforolp.ca" target="_blank" rel="noopener noreferrer">
+        Sign Up For Updates
+      </a>
+    </div>
+
+    <!-- Tabs -->
+    <div class="modal-tabs" role="tablist">
+      <button class="tab-btn active" role="tab" onclick="switchTab('overview', this)">Overview</button>
+      <button class="tab-btn"        role="tab" onclick="switchTab('choice', this)">The Choice</button>
+      <button class="tab-btn"        role="tab" onclick="switchTab('times', this)">Travel Times</button>
+      <button class="tab-btn"        role="tab" onclick="switchTab('costs', this)">Cost Assumptions</button>
+    </div>
+
+    <!-- Body -->
+    <div class="modal-body">
+
+      <!-- Overview -->
+      <div class="tab-pane active" id="pane-overview" role="tabpanel">
+        <p>This is a map of a possible high-speed rail network for Southern Ontario. It's here so you can explore it — see how the region connects, how travel times change, and what a network like this could mean for how Ontario works.</p>
+        <p>The map shows corridors linking Windsor, London, Kitchener-Waterloo, Hamilton, Niagara Falls, Barrie, and Oshawa to Toronto and Pearson Airport — all designed to 320–350 km/h standards, consistent with the federal Project Alto. Click any station or line for details. Use the Travel Times and Cost Assumptions tabs to dig into the numbers.</p>
+        <p>This is not a policy platform. It's a starting point for a conversation about what Ontario should build.</p>
+      </div>
+
+      <!-- The Choice -->
+      <div class="tab-pane" id="pane-choice" role="tabpanel">
+        <p>At this scale of investment, the relevant comparison is not between modes of transportation, but between outcomes.</p>
+        <div class="choice-grid">
+          <div class="choice-card tunnel">
+            <div class="choice-card-title">&#x1F697; The 401 Tunnel (~$100B)</div>
+            <ul>
+              <li>Adds 4 lanes of capacity to one highway corridor that already has 18 lanes</li>
+              <li>Serves primarily peak-hour drivers in a specific geography — fewer than 10% of regional commuters</li>
+              <li>Subject to induced demand: congestion returns within years</li>
+              <li>Does not change the economic relationship between regions</li>
+              <li>No substantial productivity or land-value upside</li>
+            </ul>
+          </div>
+          <div class="choice-card hsr">
+            <div class="choice-card-title">&#x1F684; High-Speed Rail (~$97B)</div>
+            <ul>
+              <li>Connects all major economic centres of Southern Ontario</li>
+              <li>Serves a broader population across multiple regions</li>
+              <li>Dramatically expands the labour market catchment of the Greater Golden Horseshoe</li>
+              <li>Economic capture and land value gains around station areas</li>
+              <li>Creates a parallel transportation system that scales with growth</li>
+              <li>Reduces pressure across the entire highway network</li>
+              <li>Permanently alters travel time between cities</li>
+              <li>Anchors local transit expansion in southwestern Ontario cities</li>
+              <li>Extends connectivity beyond station cities to rural communities</li>
+            </ul>
+          </div>
+        </div>
+        <p>When a trip that takes 90 minutes by car takes 25 by rail, something more fundamental than commute time changes. The cities on either end stop feeling like separate places and start functioning as one. Workers can live in Hamilton and reach a job in Kitchener. Students in Oshawa can access universities across the corridor. Families in Barrie aren't choosing between affordability and opportunity — they can have both. But getting there requires being honest about what this network is actually trying to do — because there are two distinct goals, and they're worth naming separately.</p>
+        <p>The first is to connect southwestern Ontario to the country. London and Windsor will not become daily commuter cities for the Greater Golden Horseshoe — the distances are simply too great for that, even at high speed. But they shouldn't be left disconnected from the country's economic core, either. Extending the corridor from Windsor through to where Project Alto picks up creates something Canada doesn't currently have: a continuous high-speed rail spine from Windsor to Qu&eacute;bec City. For London and Windsor, that means real intercity connectivity, dramatically reduced travel times to major centres, and integration into a national network. It is an economic link to the rest of the country — and it matters enormously for the communities along it.</p>
+        <p>The second goal is to turn the Greater Golden Horseshoe into a true megaregion. Hamilton, Kitchener-Waterloo, Niagara, Barrie, and Oshawa — connected to Toronto and to Pearson Airport, the country's busiest airport and one of the largest employment zones in the GTA — all within an hour of each other. At that scale the region begins to function as a single labour market, and the density of connections makes that possible in a way that no single corridor can.</p>
+        <p>What makes this more than a transit project is what happens around the stations. Every stop on this network becomes an anchor point for local transit investment. Cities like Hamilton, Kitchener, London, and Barrie can build local systems that connect into HSR rather than trying to justify them on ridership alone. More importantly, these stations can serve as the hubs for a restored provincial bus network — reaching rural communities and smaller towns across southwestern Ontario that have lost intercity service. As high-speed rail makes getting to Kitchener or London faster and easier, those bus connections become more useful, more viable, and better used. The network extends well beyond the tracks.</p>
+        <p>The economic case follows from all of this. Employers in every station city gain access to a labour pool that spans the region. Workers gain genuine choice about where to live without sacrificing what they can reach. The land around major stations becomes more valuable, generating development that compounds over time. Rural and smaller communities gain access to economic opportunities that distance currently puts out of reach. This is not a single infrastructure investment — it is a platform for growth across the province.</p>
+        <p>More than 20 million Canadians live along one of the flattest, most obvious corridors for high-speed rail in the developed world. Our peer countries have had networks like this for decades. The gap is not geography or population — it is ambition. Critics are right that Canada has allowed cost disease to inflate the price of public infrastructure. But the answer is to fix how we build, not to stop building. An advanced society serious about its future invests in infrastructure that expands opportunity, connects people, and compounds its value over generations.</p>
+      </div>
+
+      <!-- Travel Times -->
+      <div class="tab-pane" id="pane-times" role="tabpanel">
+        <p>Example travel times under the proposed network. Average speeds reflect real operating conditions — not peak — and account for acceleration, deceleration, and dwell time at intermediate stops.</p>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Route</th>
+              <th>Service</th>
+              <th>HSR Time</th>
+              <th>By Car (Typical)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Toronto &#x2192; Niagara Falls</td>
+              <td>Standard</td>
+              <td class="hsr-val">~52 min</td>
+              <td>90–120 min</td>
+            </tr>
+            <tr>
+              <td>Toronto &#x2192; Kitchener</td>
+              <td>Standard <span class="svc-info" title="Stops at Pearson Airport">i</span></td>
+              <td class="hsr-val">~42 min</td>
+              <td>90–120 min</td>
+            </tr>
+            <tr>
+              <td>Toronto &#x2192; Kitchener</td>
+              <td>Express <span class="svc-info" title="Skips Pearson Airport station">i</span></td>
+              <td class="hsr-val">~38 min</td>
+              <td>90–120 min</td>
+            </tr>
+            <tr>
+              <td>Toronto &#x2192; Windsor</td>
+              <td>Standard <span class="svc-info" title="Stops at Pearson and Chatham">i</span></td>
+              <td class="hsr-val">~2h 06m</td>
+              <td>~4h</td>
+            </tr>
+            <tr>
+              <td>Toronto &#x2192; Windsor</td>
+              <td>Express <span class="svc-info" title="Skips Pearson Airport and Chatham stations">i</span></td>
+              <td class="hsr-val">~1h 58m</td>
+              <td>~4h</td>
+            </tr>
+            <tr>
+              <td>Barrie &#x2192; Hamilton</td>
+              <td>Standard <span class="svc-info" title="Stops at Pearson">i</span></td>
+              <td class="hsr-val">~56 min</td>
+              <td>~95–110 min</td>
+            </tr>
+            <tr>
+              <td>London &#x2192; Pearson</td>
+              <td>Standard</td>
+              <td class="hsr-val">~57 min</td>
+              <td>~2h</td>
+            </tr>
+            <tr>
+              <td>Kitchener &#x2192; Hamilton</td>
+              <td>Standard</td>
+              <td class="hsr-val">~18 min</td>
+              <td>~60–90 min</td>
+            </tr>
+            <tr>
+              <td>Oshawa &#x2192; Hamilton</td>
+              <td>Standard</td>
+              <td class="hsr-val">~48 min</td>
+              <td>~90–120 min</td>
+            </tr>
+            <tr>
+              <td>Oshawa &#x2192; Kitchener</td>
+              <td>Standard</td>
+              <td class="hsr-val">~1h 06m</td>
+              <td>~110–140 min</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Costs -->
+      <div class="tab-pane" id="pane-costs" role="tabpanel">
+        <h3>System Total</h3>
+        <p>Total estimated capital cost: <strong>~$97 billion</strong> — comparable to the 401 tunnel, with a fundamentally different outcome.</p>
+        <table class="data-table" style="margin-bottom:18px;">
+          <thead><tr><th>Component</th><th>Cost</th></tr></thead>
+          <tbody>
+            <tr><td>Track &amp; Infrastructure</td><td>~$91B</td></tr>
+            <tr><td>Stations</td><td>~$6B</td></tr>
+            <tr class="cost-total-row"><td>Total</td><td>~$97B</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Track Segments</h3>
+        <table class="data-table" style="margin-bottom:18px;">
+          <thead>
+            <tr><th>Segment</th><th>Length</th><th>Avg Speed</th><th>Cost/km</th><th>Total</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Windsor &#x2192; Chatham</td><td>80 km</td><td>235 km/h</td><td>$70M</td><td>$5.6B</td></tr>
+            <tr><td>Chatham &#x2192; London</td><td>100 km</td><td>240 km/h</td><td>$75M</td><td>$7.5B</td></tr>
+            <tr><td>London &#x2192; Kitchener</td><td>110 km</td><td>245 km/h</td><td>$85M</td><td>$9.4B</td></tr>
+            <tr><td>Kitchener &#x2192; Pearson</td><td>85 km</td><td>200 km/h</td><td>$105M</td><td>$8.9B</td></tr>
+            <tr><td>Pearson &#x2192; Toronto</td><td>30 km</td><td>150 km/h</td><td>$170M</td><td>$5.1B</td></tr>
+            <tr><td>Toronto &#x2192; Oshawa</td><td>65 km</td><td>160 km/h</td><td>$155M</td><td>$10.1B</td></tr>
+            <tr><td>Toronto &#x2192; Hamilton</td><td>70 km</td><td>210 km/h</td><td>$135M</td><td>$9.5B</td></tr>
+            <tr><td>Hamilton &#x2192; Niagara Falls</td><td>85 km</td><td>180 km/h</td><td>$115M</td><td>$9.8B</td></tr>
+            <tr><td>Kitchener &#x2192; Hamilton</td><td>60 km</td><td>205 km/h</td><td>$100M</td><td>$6.0B</td></tr>
+            <tr><td>Pearson &#x2192; Barrie</td><td>115 km</td><td>220 km/h</td><td>$95M</td><td>$10.9B</td></tr>
+            <tr><td>Pearson &#x2192; Hamilton</td><td>65 km</td><td>190 km/h</td><td>$130M</td><td>$8.5B</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Track Assumptions</h3>
+        <ul class="cost-note">
+          <li>Design speed 320–350 km/h, consistent with Project Alto specifications.</li>
+          <li>No extensive tunnelling assumed — the primary cost driver avoided.</li>
+          <li>All-in per-km cost includes guideway, electrification, signalling, land acquisition, design, and contingency.</li>
+          <li>Rural: $70–85M/km · Peri-urban: $95–115M/km · Urban approaches: $130–170M/km.</li>
+          <li>For reference, Project Alto is using $60–90M/km as its estimate; this network uses higher figures for conservative planning.</li>
+        </ul>
+
+        <h3>Stations</h3>
+        <table class="data-table" style="margin-bottom:18px;">
+          <thead>
+            <tr><th>Station</th><th>Tier</th><th>Connections</th><th>Cost</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Pearson</td><td>Core Hub</td><td>4</td><td>$1.5B</td></tr>
+            <tr><td>Hamilton</td><td>Core Hub</td><td>4</td><td>$1.0B</td></tr>
+            <tr><td>Toronto (Union / East Harbour)</td><td>Major Hub</td><td>3</td><td>$1.2B</td></tr>
+            <tr><td>Kitchener–Waterloo</td><td>Major Hub</td><td>3</td><td>$0.6B</td></tr>
+            <tr><td>Oshawa</td><td>Regional</td><td>2</td><td>$0.5B</td></tr>
+            <tr><td>London</td><td>Regional</td><td>2</td><td>$0.3B</td></tr>
+            <tr><td>Chatham</td><td>Regional</td><td>2</td><td>$0.2B</td></tr>
+            <tr><td>Windsor</td><td>Regional</td><td>1</td><td>$0.25B</td></tr>
+            <tr><td>Niagara Falls</td><td>Regional</td><td>1</td><td>$0.25B</td></tr>
+            <tr><td>Barrie</td><td>Regional</td><td>1</td><td>$0.25B</td></tr>
+            <tr class="cost-total-row"><td>Total</td><td></td><td></td><td>~$6.1B</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Station Cost Assumptions</h3>
+        <ul class="cost-note">
+          <li>All-in cost includes platforms, track works, concourse, vertical circulation, surface access (bus interface, drop-off), land acquisition, design, and contingency.</li>
+          <li>Simple stations: $200–250M — typical of efficient surface builds.</li>
+          <li>Regional nodes: $500–600M — larger interchange stations.</li>
+          <li>Major hubs: $700M–$1.5B — complex urban nodes with multi-modal integration.</li>
+          <li>Ontario costs sit above typical European/Japanese benchmarks but below high-cost outliers like California — consistent with conservative planning assumptions.</li>
+        </ul>
+      </div>
+
+    </div><!-- /modal-body -->
+  </div><!-- /modal -->
+</div><!-- /modal-overlay -->
+
+<!-- ════════════════════════════════════════
+     SCRIPTS
+     ════════════════════════════════════════ -->
 <script>
-const tileSets = {
-  voyager:  'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-  positron: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-  dark:     'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-  topo:     'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
-};
-const map = L.map('map',{center:[44.0,-78.8],zoom:7,zoomControl:false});
-L.control.zoom({position:'bottomright'}).addTo(map);
-let currentTile = L.tileLayer(tileSets.voyager,{attribution:'© OpenStreetMap contributors © CARTO',subdomains:'abcd',maxZoom:15}).addTo(map);
-function switchTiles(key) {
-  map.removeLayer(currentTile);
-  currentTile = L.tileLayer(tileSets[key],{attribution:'© OpenStreetMap contributors © CARTO',subdomains:key==='topo'?'abc':'abcd',maxZoom:15}).addTo(map);
-}
+/* ──────────────────────────────────────────────────────
+   Map
+────────────────────────────────────────────────────── */
+const map = L.map('map', {
+  center: [43.55, -80.6],
+  zoom: 8,
+  zoomControl: true,
+});
 
-const layers = {ph1:L.layerGroup(),ph2:L.layerGroup(),alto:L.layerGroup()};
-Object.values(layers).forEach(l=>l.addTo(map));
-function toggleLayer(name,on){ on?layers[name].addTo(map):map.removeLayer(layers[name]); }
+L.tileLayer(
+  'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',
+  {
+    attribution:
+      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors ' +
+      '&copy; <a href="https://carto.com/attributions">CARTO</a>',
+    subdomains: 'abcd',
+    maxZoom: 19,
+  }
+).addTo(map);
 
-// ── Panel collapse ────────────────────────────────────────────
-function togglePanel(id) {
-  document.getElementById(id).classList.toggle('collapsed');
-}
-// Auto-collapse all panels on mobile
-if (window.innerWidth < 640) {
-  ['layersPanel','legendPanel'].forEach(id => {
-    document.getElementById(id).classList.add('collapsed');
-  });
-}
-
-const PH1='#E81E25', PH2='#2D2D2D', ALTO='#1A6FA8';
+/* ──────────────────────────────────────────────────────
+   Colours & coordinates
+────────────────────────────────────────────────────── */
+const SOHSR = '#E81E25', GGH = '#101010', ALTO = '#228B22';
 
 const C = {
   windsor:[42.317,-83.026], chatham:[42.404,-82.191], london:[42.984,-81.243],
@@ -244,7 +896,9 @@ const C = {
   barrie:[44.389,-79.690], peterborough:[44.300,-78.320], ottawa:[45.421,-75.697],
 };
 
-// ── Helpers ───────────────────────────────────────────────────
+/* ──────────────────────────────────────────────────────
+   Popup helpers
+────────────────────────────────────────────────────── */
 const sec  = t => `<div class="pu-section">${t}</div>`;
 const note = t => `<div class="pu-note">${t}</div>`;
 const bdg  = (t,bg,col,bdr) => `<span class="pu-badge" style="background:${bg};color:${col};border:1px solid ${bdr}">${t}</span>`;
@@ -253,253 +907,323 @@ function tRow(dest, time) {
   return `<div class="pu-row"><span class="k">${dest}</span><span class="v">${time}</span></div>`;
 }
 
-// ── Segments ──────────────────────────────────────────────────
-// Segment times (express):
-//   Windsor→Chatham: 20m  Chatham→London: 25m  London→KW: 27m
-//   KW→Pearson: 26m  Pearson→Toronto: 12m  Toronto→Oshawa: 24m
-//   Toronto→Hamilton: 20m  Hamilton→Niagara: 28m
-//   KW→Hamilton: 18m  Pearson→Hamilton: 21m  Pearson→Barrie: 31m
+/* ──────────────────────────────────────────────────────
+   Segment times (express):
+     Windsor→Chatham: 20m  Chatham→London: 25m  London→KW: 27m
+     KW→Pearson: 26m  Pearson→Toronto: 12m  Toronto→Oshawa: 24m
+     Toronto→Hamilton: 20m  Hamilton→Niagara: 28m
+     KW→Hamilton: 18m  Pearson→Hamilton: 21m  Pearson→Barrie: 31m
+────────────────────────────────────────────────────── */
 
-const segments = [
-  {phase:'ph1', name:'Windsor → Chatham',       from:C.windsor,  to:C.chatham,   km:80,  expAvg:235, expMins:20, regAvg:175, regMins:25, regStops:1, note:'Regional calls at intermediate stop.'},
-  {phase:'ph1', name:'Chatham → London',        from:C.chatham,  to:C.london,    km:100, expAvg:240, expMins:25, regAvg:185, regMins:31, regStops:0, note:'Open corridor, flat terrain.'},
-  {phase:'ph1', name:'London → Kitchener',      from:C.london,   to:C.kitchener, km:110, expAvg:245, expMins:27, regAvg:190, regMins:34, regStops:1, note:'Regional calls at Woodstock.'},
-  {phase:'ph1', name:'Kitchener → Pearson',     from:C.kitchener,to:C.pearson,   km:85,  expAvg:200, expMins:26, regAvg:165, regMins:32, regStops:1, note:'Regional calls at Brampton/Mississauga.'},
-  {phase:'ph1', name:'Pearson → Toronto Union', from:C.pearson,  to:C.toronto,   km:30,  expAvg:150, expMins:12, regAvg:130, regMins:14, regStops:0, note:'Urban grade-separated approach.'},
-  {phase:'ph1', name:'Toronto Union → Oshawa',  from:C.toronto,  to:C.oshawa,    km:65,  expAvg:160, expMins:24, regAvg:140, regMins:30, regStops:1, note:'Regional calls at Pickering/Ajax.'},
-  {phase:'ph2', name:'Toronto → Hamilton',       from:C.toronto,  to:C.hamilton,  km:70,  expAvg:210, expMins:20, regAvg:165, regMins:25, regStops:1, note:'Regional calls at Oakville/Burlington.'},
-  {phase:'ph2', name:'Hamilton → Niagara Falls', from:C.hamilton, to:C.niagara,   km:85,  expAvg:180, expMins:28, regAvg:145, regMins:35, regStops:1, note:'Regional calls at St. Catharines.'},
-  {phase:'ph2', name:'Pearson → Hamilton',       from:C.pearson,  to:C.hamilton,  km:65,  expAvg:190, expMins:21, regAvg:150, regMins:26, regStops:0, note:'No intermediate stops.'},
-  {phase:'ph2', name:'Hamilton → Kitchener',     from:C.hamilton, to:C.kitchener, km:60,  expAvg:205, expMins:18, regAvg:165, regMins:22, regStops:0, note:'Completes GTHA triangle.'},
-  {phase:'ph2', name:'Pearson → Barrie',         from:C.pearson,  to:C.barrie,    km:115, expAvg:220, expMins:31, regAvg:180, regMins:38, regStops:1, note:'Regional calls at Bradford/Innisfil.'},
+/* ── Southern Ontario HSR (Red) ── */
+const soHsrSegments = [
+  {name:'Windsor \u2192 Chatham',       from:C.windsor,  to:C.chatham,   km:80,  expAvg:235, expMins:20, regAvg:175, regMins:25, regStops:1, note:'Regional calls at intermediate stop.'},
+  {name:'Chatham \u2192 London',        from:C.chatham,  to:C.london,    km:100, expAvg:240, expMins:25, regAvg:185, regMins:31, regStops:0, note:'Open corridor, flat terrain.'},
+  {name:'London \u2192 Kitchener',      from:C.london,   to:C.kitchener, km:110, expAvg:245, expMins:27, regAvg:190, regMins:34, regStops:1, note:'Regional calls at Woodstock.'},
+  {name:'Kitchener \u2192 Pearson',     from:C.kitchener,to:C.pearson,   km:85,  expAvg:200, expMins:26, regAvg:165, regMins:32, regStops:1, note:'Regional calls at Brampton/Mississauga.'},
+  {name:'Pearson \u2192 Toronto Union', from:C.pearson,  to:C.toronto,   km:30,  expAvg:150, expMins:12, regAvg:130, regMins:14, regStops:0, note:'Urban grade-separated approach.'},
+  {name:'Toronto Union \u2192 Oshawa',  from:C.toronto,  to:C.oshawa,    km:65,  expAvg:160, expMins:24, regAvg:140, regMins:30, regStops:1, note:'Regional calls at Pickering/Ajax.'},
 ];
 
-segments.forEach(seg => {
-  const col = seg.phase==='ph1' ? PH1 : PH2;
-  L.polyline([seg.from,seg.to],{color:col,weight:12,opacity:0.15,smoothFactor:1}).addTo(layers[seg.phase]);
-  L.polyline([seg.from,seg.to],{color:col,weight:5,opacity:0.93,smoothFactor:1})
+soHsrSegments.forEach(seg => {
+  L.polyline([seg.from,seg.to],{color:SOHSR,weight:12,opacity:0.15,smoothFactor:1}).addTo(map);
+  L.polyline([seg.from,seg.to],{color:SOHSR,weight:5,opacity:0.93,smoothFactor:1})
     .bindPopup(`
       <div class="pu-title">${seg.name}</div>
-      <div class="pu-sub">${seg.km} km · click a station for full journey times</div>
-      ${sec('Journey times — this segment')}
+      <div class="pu-sub">${seg.km} km \u00b7 Southern Ontario HSR \u00b7 click a station for full journey times</div>
+      ${sec('Journey times \u2014 this segment')}
       <div class="seg-time">
-        <div><div class="lbl">⚡ Express</div><div class="val exp">${seg.expMins} min</div></div>
-        <div><div class="lbl">◎ Regional</div><div class="val reg">${seg.regMins} min</div></div>
-        <div class="subnote">${seg.regStops} intermediate stop${seg.regStops!==1?'s':''} on regional · ~4 min each · ${seg.note}</div>
-      </div>`,{maxWidth:300}).addTo(layers[seg.phase]);
+        <div><div class="lbl">\u26a1 Express</div><div class="val exp">${seg.expMins} min</div></div>
+        <div><div class="lbl">\u25ce Regional</div><div class="val reg">${seg.regMins} min</div></div>
+        <div class="subnote">${seg.regStops} intermediate stop${seg.regStops!==1?'s':''} on regional \u00b7 ~4 min each \u00b7 ${seg.note}</div>
+      </div>`,{maxWidth:300}).addTo(map);
 });
 
-// ── Alto ──────────────────────────────────────────────────────
-L.polyline([C.toronto,C.oshawa,C.peterborough,C.ottawa],{color:ALTO,weight:12,opacity:0.12}).addTo(layers.alto);
-L.polyline([C.toronto,C.oshawa,C.peterborough,C.ottawa],{color:ALTO,weight:4,opacity:0.72,dashArray:'12 5'})
+/* ── Greater Golden Horseshoe HSR (Black) ── */
+const gghSegments = [
+  {name:'Toronto \u2192 Hamilton',       from:C.toronto,  to:C.hamilton,  km:70,  expAvg:210, expMins:20, regAvg:165, regMins:25, regStops:1, note:'Regional calls at Oakville/Burlington.'},
+  {name:'Hamilton \u2192 Niagara Falls', from:C.hamilton, to:C.niagara,   km:85,  expAvg:180, expMins:28, regAvg:145, regMins:35, regStops:1, note:'Regional calls at St. Catharines.'},
+  {name:'Pearson \u2192 Hamilton',       from:C.pearson,  to:C.hamilton,  km:65,  expAvg:190, expMins:21, regAvg:150, regMins:26, regStops:0, note:'No intermediate stops.'},
+  {name:'Hamilton \u2192 Kitchener',     from:C.hamilton, to:C.kitchener, km:60,  expAvg:205, expMins:18, regAvg:165, regMins:22, regStops:0, note:'Completes GTHA triangle.'},
+  {name:'Pearson \u2192 Barrie',         from:C.pearson,  to:C.barrie,    km:115, expAvg:220, expMins:31, regAvg:180, regMins:38, regStops:1, note:'Regional calls at Bradford/Innisfil.'},
+];
+
+gghSegments.forEach(seg => {
+  L.polyline([seg.from,seg.to],{color:GGH,weight:12,opacity:0.10,smoothFactor:1}).addTo(map);
+  L.polyline([seg.from,seg.to],{color:GGH,weight:5,opacity:0.88,smoothFactor:1})
+    .bindPopup(`
+      <div class="pu-title">${seg.name}</div>
+      <div class="pu-sub">${seg.km} km \u00b7 Greater Golden Horseshoe HSR \u00b7 click a station for full journey times</div>
+      ${sec('Journey times \u2014 this segment')}
+      <div class="seg-time">
+        <div><div class="lbl">\u26a1 Express</div><div class="val exp">${seg.expMins} min</div></div>
+        <div><div class="lbl">\u25ce Regional</div><div class="val reg">${seg.regMins} min</div></div>
+        <div class="subnote">${seg.regStops} intermediate stop${seg.regStops!==1?'s':''} on regional \u00b7 ~4 min each \u00b7 ${seg.note}</div>
+      </div>`,{maxWidth:300}).addTo(map);
+});
+
+/* ── Alto (Federal — Forest Green dashed) ── */
+L.polyline([C.oshawa,C.peterborough,C.ottawa],{color:ALTO,weight:12,opacity:0.08}).addTo(map);
+L.polyline([C.oshawa,C.peterborough,C.ottawa],{color:ALTO,weight:4,opacity:0.72,dashArray:'12 5'})
   .bindPopup(`
     <div class="pu-title">Project Alto</div>
-    <div class="pu-sub">Federal HSR · Toronto – Ottawa</div>
+    <div class="pu-sub">Federal HSR \u00b7 Toronto \u2013 Ottawa</div>
     <div class="seg-time" style="margin-top:10px">
-      <div><div class="lbl">⚡ Express</div></div>
-      <div><div class="lbl">◎ Regional</div></div>
+      <div><div class="lbl">\u26a1 Express</div></div>
+      <div><div class="lbl">\u25ce Regional</div></div>
     </div>
-    ${tRow('Toronto → Ottawa','2h 05m / 2h 45m',null)}
-    ${tRow('Toronto → Peterborough','~31m / ~43m',null)}
-    ${note('Phase 1 construction: Ottawa–Montréal, 2029. Alignment via Peterborough — inland, not lakeshore.')}`,{maxWidth:290})
-  .addTo(layers.alto);
+    ${tRow('Toronto \u2192 Ottawa','2h 05m / 2h 45m')}
+    ${tRow('Toronto \u2192 Peterborough','~31m / ~43m')}
+    ${note('Phase 1 construction: Ottawa\u2013Montr\u00e9al, 2029. Alignment via Peterborough \u2014 inland, not lakeshore.')}`,{maxWidth:290})
+  .addTo(map);
 
+// Alto stations (Peterborough, Ottawa)
 [{coords:C.peterborough,name:'Peterborough',dir:'right',
-  times:[['From Toronto','~31m',null],['From Oshawa','~20m',null],['From Ottawa','~1h 25m',null]],
+  times:[['From Toronto','~31m'],['From Oshawa','~20m'],['From Ottawa','~1h 25m']],
   note:'Alto corridor stop. Inland alignment between Oshawa and Ottawa.'},
- {coords:C.ottawa,name:'Ottawa →',dir:'right',
-  times:[['From Toronto','~2h 05m',null],['From Oshawa','~1h 25m',null],['From Peterborough','~1h 05m',null]],
-  note:'Eastern map limit. Alto continues to Montréal & Québec City.'},
+ {coords:C.ottawa,name:'Ottawa \u2192',dir:'right',
+  times:[['From Toronto','~2h 05m'],['From Oshawa','~1h 25m'],['From Peterborough','~1h 05m']],
+  note:'Eastern map limit. Alto continues to Montr\u00e9al & Qu\u00e9bec City.'},
 ].forEach(s=>{
-  const timesHtml = s.times.map(([d,t,v])=>tRow(d,t,v)).join('');
+  const timesHtml = s.times.map(([d,t])=>tRow(d,t)).join('');
   L.circleMarker(s.coords,{radius:10,fillColor:ALTO,color:'#fff',weight:2.5,opacity:1,fillOpacity:1})
     .bindPopup(`
-      <div class="pu-title">${s.name.replace(' →','')}</div>
+      <div class="pu-title">${s.name.replace(' \u2192','')}</div>
       <div class="pu-sub">Project Alto Station</div>
       ${note(s.note)}
-      ${sec('⚡ Express journey times')}${timesHtml}
-      ${bdg('Project Alto','#dbeafe','#1A6FA8','#93c5fd')}`,{maxWidth:260})
-    .addTo(layers.alto);
+      ${sec('\u26a1 Express journey times')}${timesHtml}
+      ${bdg('Project Alto','#dcfce7','#166534','#86efac')}`,{maxWidth:260})
+    .addTo(map);
   L.tooltip({permanent:true,direction:s.dir,className:'alto-label',offset:[9,0]})
-    .setContent(s.name).setLatLng(s.coords).addTo(layers.alto);
+    .setContent(s.name).setLatLng(s.coords).addTo(map);
 });
 
-// ── STATIONS ──────────────────────────────────────────────────
-// All times are ⚡ express (fastest natural routing through hubs).
-// Segment reference:
-//   Windsor→Chatham: 20m  Chatham→London: 25m  London→KW: 27m
-//   KW→Pearson: 26m  Pearson→Toronto: 12m  Toronto→Oshawa: 24m
-//   Toronto→Hamilton: 20m  Hamilton→Niagara: 28m
-//   KW→Hamilton: 18m  Pearson→Hamilton: 21m  Pearson→Barrie: 31m
-
+/* ──────────────────────────────────────────────────────
+   Stations
+   All times are ⚡ express (fastest natural routing through hubs).
+────────────────────────────────────────────────────── */
 const stations = [
 
-  // ── PEARSON (4 connections) ──────────────────────────────────
-  {name:'Pearson International', coords:C.pearson, tier:4, r:14, dir:'right', proposed:false,
-   connections:4, sub:'Hub Tier 4 · 4 Connections',
-   serves:['Windsor–Oshawa spine','Hamilton branch','Barrie spur','Toronto Union stub'],
-   note:'Only Tier 4 node. Integrated airport terminal.',
+  // ── PEARSON (Core Hub · 4 connections) ──
+  // Direct: Toronto 12m, KW 26m, Hamilton 21m, Barrie 31m
+  // Oshawa: 12 + 4(Toronto) + 24 = 40m
+  // London: 26 + 4(KW) + 27 = 57m
+  // Niagara: 21 + 4(Hamilton) + 28 = 53m
+  // Windsor: 26 + 4(KW) + 27 + 4(London) + 25 + 20 = 106m
+  {name:'Pearson International', coords:C.pearson, tier:'core', r:14, dir:'right', proposed:false,
+   connections:4, sub:'Core Hub \u00b7 4 Connections',
+   serves:['Windsor\u2013Oshawa spine','Hamilton branch','Barrie spur','Toronto Union stub'],
+   note:'Core hub. Integrated airport terminal.',
    chatham:false,
    times:[
-     ['Toronto Union',    '12m',   null],
-     ['Kitchener',        '26m',   null],
-     ['Hamilton',         '21m',   'Pearson–Hamilton branch'],
-     ['Barrie',           '31m',   null],
-     ['Oshawa',           '36m',   'Toronto'],
-     ['London',           '53m',   null],
-     ['Niagara Falls',    '49m',   'Hamilton'],
-     ['Windsor',          '1h 38m',null],
+     ['Toronto Union',    '12m'],
+     ['Kitchener',        '26m'],
+     ['Hamilton',         '21m'],
+     ['Barrie',           '31m'],
+     ['Oshawa',           '40m'],
+     ['London',           '57m'],
+     ['Niagara Falls',    '53m'],
+     ['Windsor',          '1h 46m'],
    ]},
 
-  // ── TORONTO (3 connections) ──────────────────────────────────
-  {name:'Toronto Union / East Harbour', coords:C.toronto, tier:3, r:12, dir:'top', proposed:false,
-   connections:3, sub:'Hub Tier 3 · 3 Connections',
-   serves:['Windsor–Oshawa spine','Toronto–Niagara branch','Project Alto (via Oshawa)'],
-   note:'LVC opportunity at East Harbour. TTC & GO interchange.',
-   chatham:false,
-   times:[
-     ['Pearson',          '12m',   null],
-     ['Oshawa',           '24m',   null],
-     ['Hamilton',         '20m',   null],
-     ['Niagara Falls',    '48m',   'Hamilton'],
-     ['Kitchener',        '38m',   'Pearson'],
-     ['London',           '1h 05m','Pearson'],
-     ['Windsor',          '1h 50m','Pearson'],
-     ['Peterborough (Alto)','~31m','Oshawa'],
-     ['Ottawa (Alto)',    '~2h 05m','Oshawa'],
-   ]},
-
-  // ── HAMILTON (4 connections) ─────────────────────────────────
-  {name:'Hamilton', coords:C.hamilton, tier:4, r:14, dir:'bottom', proposed:false,
-   connections:4, sub:'Hub Tier 4 · 4 Connections',
-   serves:['Toronto–Niagara branch','Pearson–Hamilton branch','Hamilton–Kitchener branch','Niagara corridor'],
+  // ── HAMILTON (Core Hub · 4 connections) ──
+  // Direct: Niagara 28m, Pearson 21m, KW 18m, Toronto 20m
+  // Barrie: 21 + 0(Pearson skip) + 31 = 52m
+  // Oshawa: 20 + 4(Toronto) + 24 = 48m
+  // London: 18 + 4(KW) + 27 = 49m
+  // Windsor: 18 + 4(KW) + 27 + 4(London) + 25 + 20 = 98m
+  {name:'Hamilton', coords:C.hamilton, tier:'core', r:14, dir:'bottom', proposed:false,
+   connections:4, sub:'Core Hub \u00b7 4 Connections',
+   serves:['Toronto\u2013Niagara branch','Pearson\u2013Hamilton branch','Hamilton\u2013Kitchener branch','Niagara corridor'],
    note:'Major junction. Gateway to Niagara & KW branches. Local BRT/LRT connection.',
    chatham:false,
    times:[
-     ['Niagara Falls',    '28m',   null],
-     ['Pearson',          '21m',   'Pearson–Hamilton branch'],
-     ['Kitchener',        '18m',   'Hamilton–KW branch'],
-     ['Toronto Union',    '20m',   null],
-     ['Barrie',           '52m',   'Pearson'],
-     ['Oshawa',           '44m',   'Toronto'],
-     ['London',           '45m',   'Kitchener'],
-     ['Windsor',          '1h 30m','Kitchener'],
+     ['Niagara Falls',    '28m'],
+     ['Pearson',          '21m'],
+     ['Kitchener',        '18m'],
+     ['Toronto Union',    '20m'],
+     ['Barrie',           '52m'],
+     ['Oshawa',           '48m'],
+     ['London',           '49m'],
+     ['Windsor',          '1h 38m'],
    ]},
 
-  // ── KITCHENER (3 connections) ────────────────────────────────
-  {name:'Kitchener–Waterloo', coords:C.kitchener, tier:3, r:12, dir:'left', proposed:false,
-   connections:3, sub:'Hub Tier 3 · 3 Connections',
-   serves:['Windsor–Oshawa spine','Hamilton–Kitchener branch','London corridor'],
+  // ── TORONTO (Major Hub · 3 connections) ──
+  // Direct: Pearson 12m, Oshawa 24m, Hamilton 20m
+  // Niagara: 20 + 4(Hamilton) + 28 = 52m
+  // KW: 12 + 0(Pearson skip) + 26 = 38m
+  // London: 12 + 0(Pearson) + 26 + 4(KW) + 27 = 69m
+  // Windsor: 12 + 0(Pearson) + 26 + 4(KW) + 27 + 4(London) + 25 + 20 = 118m
+  {name:'Toronto Union / East Harbour', coords:C.toronto, tier:'major', r:12, dir:'top', proposed:false,
+   connections:3, sub:'Major Hub \u00b7 3 Connections',
+   serves:['Windsor\u2013Oshawa spine','Toronto\u2013Niagara branch','Project Alto (via Oshawa)'],
+   note:'LVC opportunity at East Harbour. TTC & GO interchange.',
+   chatham:false,
+   times:[
+     ['Pearson',          '12m'],
+     ['Oshawa',           '24m'],
+     ['Hamilton',         '20m'],
+     ['Niagara Falls',    '52m'],
+     ['Kitchener',        '38m'],
+     ['London',           '1h 09m'],
+     ['Windsor',          '1h 58m'],
+     ['Peterborough (Alto)','~31m'],
+     ['Ottawa (Alto)',    '~2h 05m'],
+   ]},
+
+  // ── KITCHENER (Major Hub · 3 connections) ──
+  // Direct: Hamilton 18m, London 27m, Pearson 26m
+  // Toronto: 26 + 0(Pearson skip) + 12 = 38m
+  // Niagara: 18 + 4(Hamilton) + 28 = 50m
+  // Windsor: 27 + 4(London) + 25 + 20 = 76m
+  // Barrie: 26 + 0(Pearson skip) + 31 = 57m
+  // Oshawa: 26 + 0(Pearson) + 12 + 4(Toronto) + 24 = 66m
+  {name:'Kitchener\u2013Waterloo', coords:C.kitchener, tier:'major', r:12, dir:'left', proposed:false,
+   connections:3, sub:'Major Hub \u00b7 3 Connections',
+   serves:['Windsor\u2013Oshawa spine','Hamilton\u2013Kitchener branch','London corridor'],
    note:'University cluster. Tech corridor anchor. ION LRT interchange.',
    chatham:false,
    times:[
-     ['Hamilton',         '18m',   'Hamilton–KW branch'],
-     ['London',           '27m',   null],
-     ['Pearson',          '26m',   null],
-     ['Toronto Union',    '38m',   'Pearson'],
-     ['Niagara Falls',    '46m',   'Hamilton'],
-     ['Windsor',          '1h 12m',null],
-     ['Barrie',           '57m',   'Pearson'],
-     ['Oshawa',           '1h 02m','Pearson, Toronto'],
+     ['Hamilton',         '18m'],
+     ['London',           '27m'],
+     ['Pearson',          '26m'],
+     ['Toronto Union',    '38m'],
+     ['Niagara Falls',    '50m'],
+     ['Windsor',          '1h 16m'],
+     ['Barrie',           '57m'],
+     ['Oshawa',           '1h 06m'],
    ]},
 
-  // ── OSHAWA (2 connections) ───────────────────────────────────
-  {name:'Oshawa', coords:C.oshawa, tier:3, r:12, dir:'right', proposed:true,
-   connections:2, sub:'Hub Tier 3 · 2 Connections',
-   serves:['Windsor–Oshawa spine','Project Alto (Peterborough–Ottawa)'],
-   note:'Proposed new station. Express stop and Alto interchange. Durham Region anchor.',
+  // ── OSHAWA (Regional · 2 connections) ──
+  // Direct: Toronto 24m
+  // Pearson: 24 + 4(Toronto) + 12 = 40m
+  // Hamilton: 24 + 4(Toronto) + 20 = 48m
+  // Niagara: 24 + 4(Toronto) + 20 + 4(Hamilton) + 28 = 80m
+  // KW: 24 + 4(Toronto) + 12 + 0(Pearson) + 26 = 66m
+  // London: 24 + 4(Toronto) + 12 + 0(Pearson) + 26 + 4(KW) + 27 = 97m
+  // Windsor: 24 + 4 + 12 + 0 + 26 + 4 + 27 + 4 + 25 + 20 = 146m
+  {name:'Oshawa', coords:C.oshawa, tier:'regional', r:9, dir:'right', proposed:false,
+   connections:2, sub:'Regional \u00b7 2 Connections',
+   serves:['Windsor\u2013Oshawa spine','Project Alto (Peterborough\u2013Ottawa)'],
+   note:'Express stop and Alto interchange. Durham Region anchor.',
    chatham:false,
    times:[
-     ['Toronto Union',    '24m',   null],
-     ['Pearson',          '36m',   'Toronto'],
-     ['Hamilton',         '44m',   'Toronto'],
-     ['Niagara Falls',    '1h 12m','Toronto, Hamilton'],
-     ['Kitchener',        '1h 02m','Toronto, Pearson'],
-     ['London',           '1h 29m','Toronto, Pearson'],
-     ['Windsor',          '2h 14m','Toronto, Pearson'],
-     ['Peterborough (Alto)','~20m',null],
-     ['Ottawa (Alto)',    '~1h 25m',null],
+     ['Toronto Union',    '24m'],
+     ['Pearson',          '40m'],
+     ['Hamilton',         '48m'],
+     ['Niagara Falls',    '1h 20m'],
+     ['Kitchener',        '1h 06m'],
+     ['London',           '1h 37m'],
+     ['Windsor',          '2h 26m'],
+     ['Peterborough (Alto)','~20m'],
+     ['Ottawa (Alto)',    '~1h 25m'],
    ]},
 
-  // ── LONDON ───────────────────────────────────────────────────
-  {name:'London', coords:C.london, tier:0, r:9, dir:'left', proposed:false,
-   connections:2, sub:'Regional Node · 2 Connections', serves:['Windsor–Oshawa spine','Kitchener–Windsor corridor'],
+  // ── LONDON (Regional · 2 connections) ──
+  // Direct: KW 27m, Windsor 25+20=45m (Chatham skip)
+  // Pearson: 27 + 4(KW) + 26 = 57m
+  // Toronto: 27 + 4(KW) + 26 + 0(Pearson) + 12 = 69m
+  // Hamilton: 27 + 4(KW) + 18 = 49m
+  // Niagara: 27 + 4(KW) + 18 + 4(Hamilton) + 28 = 81m
+  {name:'London', coords:C.london, tier:'regional', r:9, dir:'left', proposed:false,
+   connections:2, sub:'Regional \u00b7 2 Connections', serves:['Windsor\u2013Oshawa spine','Kitchener\u2013Windsor corridor'],
    note:'Local rapid transit hub. Regional bus feeder to surrounding communities.',
    chatham:false,
    times:[
-     ['Kitchener',        '27m',   null],
-     ['Windsor',          '45m',   null],
-     ['Pearson',          '53m',   null],
-     ['Toronto Union',    '1h 05m','Pearson'],
-     ['Hamilton',         '45m',   'Kitchener'],
-     ['Niagara Falls',    '1h 13m','Kitchener, Hamilton'],
+     ['Kitchener',        '27m'],
+     ['Windsor',          '45m'],
+     ['Pearson',          '57m'],
+     ['Toronto Union',    '1h 09m'],
+     ['Hamilton',         '49m'],
+     ['Niagara Falls',    '1h 21m'],
    ]},
 
-  // ── CHATHAM (express skip — regional times shown) ─────────────
-  {name:'Chatham', coords:C.chatham, tier:0, r:9, dir:'top', proposed:false, chatham:true,
-   connections:2, sub:'Regional Node · Express Skip',
-   serves:['Windsor–Oshawa spine'],
+  // ── CHATHAM (Regional · express skip — regional times) ──
+  {name:'Chatham', coords:C.chatham, tier:'regional', r:9, dir:'top', proposed:false, chatham:true,
+   connections:2, sub:'Regional \u00b7 Express Skip',
+   serves:['Windsor\u2013Oshawa spine'],
    note:'Express trains do not stop here. All times below are regional service.',
    times:[
-     ['Windsor',          '20m',   null],
-     ['London',           '25m',   null],
-     ['Kitchener',        '52m',   null],
-     ['Toronto Union',    '1h 30m',null],
+     ['Windsor',          '20m'],
+     ['London',           '25m'],
+     ['Kitchener',        '52m'],
+     ['Toronto Union',    '1h 30m'],
    ]},
 
-  // ── WINDSOR ──────────────────────────────────────────────────
-  {name:'Windsor', coords:C.windsor, tier:0, r:9, dir:'left', proposed:false,
-   connections:1, sub:'Western Terminus', serves:['Windsor–Oshawa spine'],
+  // ── WINDSOR (Regional · 1 connection) ──
+  // Direct: London 20+25=45m (Chatham skip)
+  // KW: 20 + 25 + 4(London) + 27 = 76m
+  // Pearson: 20 + 25 + 4(London) + 27 + 4(KW) + 26 = 106m
+  // Toronto: 20 + 25 + 4(London) + 27 + 4(KW) + 26 + 0(Pearson) + 12 = 118m
+  // Hamilton: 20 + 25 + 4(London) + 27 + 4(KW) + 18 = 98m
+  // Oshawa: 20 + 25 + 4 + 27 + 4 + 26 + 0 + 12 + 4 + 24 = 146m
+  {name:'Windsor', coords:C.windsor, tier:'regional', r:9, dir:'left', proposed:false,
+   connections:1, sub:'Regional \u00b7 Western Terminus', serves:['Windsor\u2013Oshawa spine'],
    note:'Cross-border connection to Detroit. Western anchor.',
    chatham:false,
    times:[
-     ['London',           '45m',   null],
-     ['Kitchener',        '1h 12m',null],
-     ['Pearson',          '1h 38m',null],
-     ['Toronto Union',    '1h 50m','Pearson'],
-     ['Hamilton',         '1h 30m','Kitchener'],
-     ['Oshawa',           '2h 14m','Pearson, Toronto'],
+     ['London',           '45m'],
+     ['Kitchener',        '1h 16m'],
+     ['Pearson',          '1h 46m'],
+     ['Toronto Union',    '1h 58m'],
+     ['Hamilton',         '1h 38m'],
+     ['Oshawa',           '2h 26m'],
    ]},
 
-  // ── NIAGARA FALLS ────────────────────────────────────────────
-  {name:'Niagara Falls', coords:C.niagara, tier:0, r:9, dir:'bottom', proposed:false,
-   connections:1, sub:'Southern Terminus', serves:['Toronto–Niagara'],
+  // ── NIAGARA FALLS (Regional · 1 connection) ──
+  // Direct: Hamilton 28m
+  // Pearson: 28 + 4(Hamilton) + 21 = 53m
+  // KW: 28 + 4(Hamilton) + 18 = 50m
+  // Toronto: 28 + 4(Hamilton) + 20 = 52m
+  // Oshawa: 28 + 4(Hamilton) + 20 + 4(Toronto) + 24 = 80m
+  // London: 28 + 4(Hamilton) + 18 + 4(KW) + 27 = 81m
+  {name:'Niagara Falls', coords:C.niagara, tier:'regional', r:9, dir:'bottom', proposed:false,
+   connections:1, sub:'Regional \u00b7 Southern Terminus', serves:['Toronto\u2013Niagara'],
    note:'Tourism and cross-border traffic. Southern anchor.',
    chatham:false,
    times:[
-     ['Hamilton',         '28m',   null],
-     ['Pearson',          '49m',   'Hamilton'],
-     ['Kitchener',        '46m',   'Hamilton'],
-     ['Toronto Union',    '48m',   'Hamilton'],
-     ['Oshawa',           '1h 12m','Hamilton, Toronto'],
-     ['London',           '1h 13m','Hamilton, Kitchener'],
+     ['Hamilton',         '28m'],
+     ['Pearson',          '53m'],
+     ['Kitchener',        '50m'],
+     ['Toronto Union',    '52m'],
+     ['Oshawa',           '1h 20m'],
+     ['London',           '1h 21m'],
    ]},
 
-  // ── BARRIE ───────────────────────────────────────────────────
-  {name:'Barrie', coords:C.barrie, tier:0, r:9, dir:'right', proposed:false,
-   connections:1, sub:'Northern Terminus', serves:['Pearson–Barrie'],
+  // ── BARRIE (Regional · 1 connection) ──
+  // Direct: Pearson 31m
+  // Toronto: 31 + 0(Pearson skip) + 12 = 43m
+  // Hamilton: 31 + 0(Pearson skip) + 21 = 52m
+  // KW: 31 + 0(Pearson skip) + 26 = 57m
+  // Niagara: 31 + 0(Pearson) + 21 + 4(Hamilton) + 28 = 84m
+  // London: 31 + 0(Pearson) + 26 + 4(KW) + 27 = 88m
+  {name:'Barrie', coords:C.barrie, tier:'regional', r:9, dir:'right', proposed:false,
+   connections:1, sub:'Regional \u00b7 Northern Terminus', serves:['Pearson\u2013Barrie'],
    note:'Northern anchor. Simcoe County gateway.',
    chatham:false,
    times:[
-     ['Pearson',          '31m',   null],
-     ['Toronto Union',    '43m',   'Pearson'],
-     ['Hamilton',         '52m',   'Pearson'],
-     ['Kitchener',        '57m',   'Pearson'],
-     ['Niagara Falls',    '1h 20m','Pearson, Hamilton'],
-     ['London',           '1h 24m','Pearson'],
+     ['Pearson',          '31m'],
+     ['Toronto Union',    '43m'],
+     ['Hamilton',         '52m'],
+     ['Kitchener',        '57m'],
+     ['Niagara Falls',    '1h 24m'],
+     ['London',           '1h 28m'],
    ]},
 ];
 
+/* ──────────────────────────────────────────────────────
+   Station popup builder
+────────────────────────────────────────────────────── */
 function stationPopup(s) {
   const servesHtml = s.serves.map(l=>`<div class="pu-row"><span class="k" style="color:#888">Serves</span><span class="v sm">${l}</span></div>`).join('');
-  const timesHtml  = s.times.map(([d,t,v])=>tRow(d,t,v)).join('');
-  const tierBadge  = s.tier===4
-    ? bdg('Tier 4 · '+s.connections+' Connections','#fef3c7','#92400e','#fcd34d')
-    : s.tier===3
-    ? bdg('Tier 3 · '+s.connections+' Connections','#fee2e2','#991b1b','#fca5a5')
-    : bdg('Regional · '+s.connections+' Connection'+(s.connections!==1?'s':''),'#f3f4f6','#374151','#d1d5db');
-  const propFlag   = s.proposed ? `<span class="pu-proposed">⚠ Proposed New Station</span><br>` : '';
-  const timeLabel  = s.chatham  ? '◎ Regional journey times' : '⚡ Express journey times';
+  const timesHtml  = s.times.map(([d,t])=>tRow(d,t)).join('');
+  const tierBadge  = s.tier==='core'
+    ? bdg('Core Hub \u00b7 '+s.connections+' Connections','#fee2e2','#991b1b','#fca5a5')
+    : s.tier==='major'
+    ? bdg('Major Hub \u00b7 '+s.connections+' Connections','#dbeafe','#1e40af','#93c5fd')
+    : bdg('Regional \u00b7 '+s.connections+' Connection'+(s.connections!==1?'s':''),'#f3f4f6','#374151','#d1d5db');
+  const propFlag   = s.proposed ? `<span class="pu-proposed">\u26a0 Proposed New Station</span><br>` : '';
+  const timeLabel  = s.chatham  ? '\u25ce Regional journey times' : '\u26a1 Express journey times';
 
   return `
     <div class="pu-title">${s.name}</div>
@@ -511,35 +1235,63 @@ function stationPopup(s) {
     <div style="margin-top:10px">${tierBadge}</div>`;
 }
 
+/* ──────────────────────────────────────────────────────
+   Render stations
+────────────────────────────────────────────────────── */
 stations.forEach(s => {
-  const col = s.tier===4?'#d4a017':s.tier===3?'#1d6fa4':'#6b7280';
-  L.circleMarker(s.coords,{radius:s.r+4,fillColor:col,color:'white',weight:0,opacity:0,fillOpacity:0.18}).addTo(layers.ph1);
+  const col = s.tier==='core'?'#E81E25':s.tier==='major'?'#101010':'#6b7280';
+  // Halo
+  L.circleMarker(s.coords,{radius:s.r+4,fillColor:col,color:'white',weight:0,opacity:0,fillOpacity:0.18}).addTo(map);
+  // Marker
   const mOpts={radius:s.r,fillColor:col,color:'#fff',weight:2.5,opacity:1,fillOpacity:1};
   if(s.proposed){mOpts.color='#854d0e';mOpts.dashArray='4 3';}
-  const marker=L.circleMarker(s.coords,mOpts).addTo(layers.ph1);
+  const marker=L.circleMarker(s.coords,mOpts).addTo(map);
   marker.bindPopup(stationPopup(s),{maxWidth:290});
   marker.bindTooltip(s.proposed?s.name+' *':s.name,
-    {permanent:true,direction:s.dir,offset:s.tier>=3?[12,0]:[9,0],className:'station-label'});
+    {permanent:true,direction:s.dir,offset:s.tier!=='regional'?[12,0]:[9,0],className:'station-label'});
 });
 
-// ── Speed info ────────────────────────────────────────────────
-const infoCtrl=L.control({position:'bottomright'});
-infoCtrl.onAdd=()=>{
-  const d=L.DomUtil.create('div','info-box');
-  d.innerHTML=`
-    <div style="font-weight:700;font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:#999;margin-bottom:8px">Speed assumptions</div>
-    <div style="display:flex;justify-content:space-between;gap:16px;margin-bottom:3px"><span style="color:#E81E25;font-weight:700">⚡ Open / rural</span><span style="color:#E81E25;font-weight:700">235–245 km/h</span></div>
-    <div style="display:flex;justify-content:space-between;gap:16px;margin-bottom:3px"><span style="color:#E81E25;font-weight:700">⚡ Mixed corridors</span><span style="color:#E81E25;font-weight:700">190–220 km/h</span></div>
-    <div style="display:flex;justify-content:space-between;gap:16px;margin-bottom:3px"><span style="color:#888">Urban approaches</span><span style="color:#101010;font-weight:700">150–165 km/h</span></div>
-    <div style="display:flex;justify-content:space-between;gap:16px;margin-bottom:3px"><span style="color:#888">Per stop penalty</span><span style="color:#101010;font-weight:700">~4 min</span></div>
-    <div style="font-size:10px;color:#999;margin-top:7px;border-top:1px solid #DFE1E4;padding-top:6px">
-      Times via natural routing through hubs.<br>
-      Chatham shows regional (express skips).<br>
-      Click a line for express vs regional comparison.
-    </div>`;
-  return d;
-};
-infoCtrl.addTo(map);
+/* ──────────────────────────────────────────────────────
+   Modal
+────────────────────────────────────────────────────── */
+function openModal() {
+  const overlay = document.getElementById('modal-overlay');
+  overlay.classList.remove('hidden');
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.add('hidden');
+}
+
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('pane-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+
+// Close on backdrop click
+document.getElementById('modal-overlay').addEventListener('click', function (e) {
+  if (e.target === this) closeModal();
+});
+
+// Close on Escape
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') closeModal();
+});
+
+/* ──────────────────────────────────────────────────────
+   Legend toggle (mobile)
+────────────────────────────────────────────────────── */
+let legendOpen = true;
+
+function toggleLegend() {
+  legendOpen = !legendOpen;
+  const body = document.getElementById('legend-body');
+  const btn  = document.getElementById('legend-toggle');
+  body.style.display = legendOpen ? '' : 'none';
+  btn.textContent    = legendOpen ? '\u25BC' : '\u25B2';
+}
 </script>
 </body>
 </html>
