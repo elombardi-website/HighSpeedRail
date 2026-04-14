@@ -34,23 +34,45 @@ body { font-family:'PPPangramSans',Arial,sans-serif; font-weight:400; background
   top: 16px;
   right: 16px;
   z-index: 1000;
-  height: 40px;
-  padding: 0 18px;
-  border-radius: 20px;
+  height: 38px;
+  padding: 0 14px;
+  border-radius: 12px;
   background: #E81E25;
   color: #F2F4F7;
-  border: none;
+  border: 1px solid #DFE1E4;
   font-family:'PPPangramSans',Arial,sans-serif;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 3px 12px rgba(232,30,37,0.4);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.12);
   transition: background 0.18s, transform 0.12s;
 }
 #info-btn:hover { background: #c9191f; transform: scale(1.07); }
+
+#credit-tag {
+  position: absolute;
+  left: 12px;
+  bottom: 10px;
+  z-index: 1000;
+  background: rgba(242, 244, 247, 0.94);
+  border: 1px solid #DFE1E4;
+  border-radius: 12px;
+  padding: 8px 10px;
+  font-size: 14px;
+  color: #2D2D2D;
+  line-height: 1.35;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+}
+
+#credit-tag .credit-name {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 1px;
+}
 
 /* ── Legend ── */
 #legend {
@@ -61,8 +83,9 @@ body { font-family:'PPPangramSans',Arial,sans-serif; font-weight:400; background
   background: rgba(242,244,247,0.97);
   backdrop-filter: blur(10px);
   border-radius: 12px;
-  padding: 14px 16px 16px;
-  box-shadow: 0 4px 22px rgba(0,0,0,0.14);
+  border: 1px solid #DFE1E4;
+  padding: 12px 14px 14px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.12);
   min-width: 210px;
   max-height: calc(100vh - 100px);
   overflow-y: auto;
@@ -77,10 +100,10 @@ body { font-family:'PPPangramSans',Arial,sans-serif; font-weight:400; background
 
 .legend-title {
   font-family:'PPPangramSans',Arial,sans-serif;
-  font-size: 12px;
-  font-weight: 800;
+  font-size: 14px;
+  font-weight: 700;
   color: #101010;
-  letter-spacing: 0.6px;
+  letter-spacing: 0.4px;
   text-transform: uppercase;
 }
 
@@ -96,7 +119,7 @@ body { font-family:'PPPangramSans',Arial,sans-serif; font-weight:400; background
 
 .legend-section {
   font-family:'PPPangramSans',Arial,sans-serif;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   color: #2D2D2D;
   text-transform: uppercase;
@@ -112,7 +135,7 @@ body { font-family:'PPPangramSans',Arial,sans-serif; font-weight:400; background
 }
 
 .legend-row span {
-  font-size: 12px;
+  font-size: 14px;
   color: #2D2D2D;
   line-height: 1.3;
 }
@@ -146,7 +169,7 @@ body { font-family:'PPPangramSans',Arial,sans-serif; font-weight:400; background
 }
 
 .speed-row {
-  font-size: 11px;
+  font-size: 13px;
   color: #2D2D2D;
   line-height: 1.5;
 }
@@ -154,12 +177,12 @@ body { font-family:'PPPangramSans',Arial,sans-serif; font-weight:400; background
 .speed-row strong {
   color: #101010;
   display: block;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
 }
 
 .design-speed {
-  font-size: 11px;
+  font-size: 13px;
   color: #2D2D2D;
   margin-bottom: 4px;
 }
@@ -485,6 +508,7 @@ body { font-family:'PPPangramSans',Arial,sans-serif; font-weight:400; background
 
 .data-table tr:last-child td { border-bottom: none; }
 .data-table tr:hover td { background: #F2F4F7; }
+.choice-table tbody td:first-child { font-weight: 700; }
 
 .hsr-val {
   font-weight: 700;
@@ -576,7 +600,8 @@ body { font-family:'PPPangramSans',Arial,sans-serif; font-weight:400; background
 <div id="map"></div>
 
 <!-- Overview button -->
-<button id="info-btn" onclick="openModal()" title="About this map" aria-label="Open information panel">Overview</button>
+<button id="info-btn" onclick="openModal()" title="About this map" aria-label="Open information panel">What is this?</button>
+<div id="credit-tag"><span class="credit-name">Made by Eric Lombardi</span>Exploring a run for Ontario Liberal Party leader</div>
 
 <!-- ════════════════════════════════════════
      LEGEND
@@ -631,7 +656,7 @@ body { font-family:'PPPangramSans',Arial,sans-serif; font-weight:400; background
 <!-- ════════════════════════════════════════
      MODAL
      ════════════════════════════════════════ -->
-<div id="modal-overlay" role="dialog" aria-modal="true" aria-label="About this map">
+<div id="modal-overlay" class="hidden" role="dialog" aria-modal="true" aria-label="About this map">
   <div id="modal">
 
     <!-- Header -->
@@ -640,8 +665,6 @@ body { font-family:'PPPangramSans',Arial,sans-serif; font-weight:400; background
     </div>
     <div class="modal-top" style="padding-top:0;">
       <h1 class="modal-title">A High-Speed Rail Alternative for Southern Ontario</h1>
-      <p class="modal-exploring">Eric Lombardi is exploring a run for Ontario Liberal Party Leader.</p>
-      <p class="modal-lead">Ontario is considering spending <a href="https://www.cbc.ca/news/canada/toronto/401-tunnel-cost-1.7464404" target="_blank" rel="noopener noreferrer" style="color:#E81E25;font-weight:600;">~$100 billion tunnelling under Highway 401</a>. This map explores what a comparable investment could build instead — shared as an idea for public discussion, not a campaign commitment.</p>
     </div>
 
     <!-- CTAs -->
@@ -666,44 +689,76 @@ body { font-family:'PPPangramSans',Arial,sans-serif; font-weight:400; background
       <!-- Overview -->
       <div class="tab-pane active" id="pane-overview" role="tabpanel">
         <p>This is a map of a possible high-speed rail network for Southern Ontario. It's here so you can explore it — see how the region connects, how travel times change, and what a network like this could mean for how Ontario works.</p>
-        <p>The map shows corridors linking Windsor, London, Kitchener-Waterloo, Hamilton, Niagara Falls, Barrie, and Oshawa to Toronto and Pearson Airport — all designed to 320–350 km/h standards, consistent with the federal Project Alto. Click any station or line for details. Use the Travel Times and Cost Assumptions tabs to dig into the numbers.</p>
         <p>This is not a policy platform. It's a starting point for a conversation about what Ontario should build.</p>
       </div>
 
       <!-- The Choice -->
       <div class="tab-pane" id="pane-choice" role="tabpanel">
-        <p>At this scale of investment, the relevant comparison is not between modes of transportation, but between outcomes.</p>
-        <div class="choice-grid">
-          <div class="choice-card tunnel">
-            <div class="choice-card-title">&#x1F697; The 401 Tunnel (~$100B)</div>
-            <ul>
-              <li>Adds 4 lanes of capacity to one highway corridor that already has 18 lanes</li>
-              <li>Serves primarily peak-hour drivers in a specific geography — fewer than 10% of regional commuters</li>
-              <li>Subject to induced demand: congestion returns within years</li>
-              <li>Does not change the economic relationship between regions</li>
-              <li>No substantial productivity or land-value upside</li>
-            </ul>
-          </div>
-          <div class="choice-card hsr">
-            <div class="choice-card-title">&#x1F684; High-Speed Rail (~$97B)</div>
-            <ul>
-              <li>Connects all major economic centres of Southern Ontario</li>
-              <li>Serves a broader population across multiple regions</li>
-              <li>Dramatically expands the labour market catchment of the Greater Golden Horseshoe</li>
-              <li>Economic capture and land value gains around station areas</li>
-              <li>Creates a parallel transportation system that scales with growth</li>
-              <li>Reduces pressure across the entire highway network</li>
-              <li>Permanently alters travel time between cities</li>
-              <li>Anchors local transit expansion in southwestern Ontario cities</li>
-              <li>Extends connectivity beyond station cities to rural communities</li>
-            </ul>
-          </div>
-        </div>
+        <table class="data-table choice-table" style="margin-bottom:18px;">
+          <thead>
+            <tr>
+              <th>Value proposition</th>
+              <th>401 Tunnel (~$100B)</th>
+              <th>High-Speed Rail (~$97B)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Serves broad population</td>
+              <td>No — fewer than 10% of regional commuters</td>
+              <td>Yes — connects all major economic centres of Southern Ontario</td>
+            </tr>
+            <tr>
+              <td>Durable congestion relief</td>
+              <td>No — induced demand restores congestion within years</td>
+              <td>Yes — reduces pressure across the entire highway network</td>
+            </tr>
+            <tr>
+              <td>Labour market expansion</td>
+              <td>No — serves existing geography, no new reach</td>
+              <td>Yes — dramatically expands the Greater Golden Horseshoe catchment</td>
+            </tr>
+            <tr>
+              <td>Land value &amp; economic uplift</td>
+              <td>No — no substantial productivity or land-value upside</td>
+              <td>Yes — economic capture and gains around station areas</td>
+            </tr>
+            <tr>
+              <td>Scales with growth</td>
+              <td>No — fixed capacity, fixed geography</td>
+              <td>Yes — system designed to grow alongside demand</td>
+            </tr>
+            <tr>
+              <td>Permanently changes intercity travel</td>
+              <td>No — incremental, corridor-specific</td>
+              <td>Yes — permanently alters travel time between cities</td>
+            </tr>
+            <tr>
+              <td>Anchors local transit</td>
+              <td>No — standalone highway infrastructure</td>
+              <td>Yes — anchors transit expansion in southwestern Ontario cities</td>
+            </tr>
+            <tr>
+              <td>Serves rural &amp; smaller communities</td>
+              <td>No — limited to highway corridor users</td>
+              <td>Yes — extends connectivity beyond station cities</td>
+            </tr>
+            <tr>
+              <td>Changes economic relationship between regions</td>
+              <td>No — does not alter regional economic dynamics</td>
+              <td>Yes — integrates labour and economic activity across the corridor</td>
+            </tr>
+          </tbody>
+        </table>
+        <h3>Problem</h3>
         <p>When a trip that takes 90 minutes by car takes 25 by rail, something more fundamental than commute time changes. The cities on either end stop feeling like separate places and start functioning as one. Workers can live in Hamilton and reach a job in Kitchener. Students in Oshawa can access universities across the corridor. Families in Barrie aren't choosing between affordability and opportunity — they can have both. But getting there requires being honest about what this network is actually trying to do — because there are two distinct goals, and they're worth naming separately.</p>
-        <p>The first is to connect southwestern Ontario to the country. London and Windsor will not become daily commuter cities for the Greater Golden Horseshoe — the distances are simply too great for that, even at high speed. But they shouldn't be left disconnected from the country's economic core, either. Extending the corridor from Windsor through to where Project Alto picks up creates something Canada doesn't currently have: a continuous high-speed rail spine from Windsor to Qu&eacute;bec City. For London and Windsor, that means real intercity connectivity, dramatically reduced travel times to major centres, and integration into a national network. It is an economic link to the rest of the country — and it matters enormously for the communities along it.</p>
+        <h3>Goals</h3>
+        <p>The first is to connect southwestern Ontario to the country. London and Windsor will not become daily commuter cities for the Greater Golden Horseshoe — the distances are simply too great for that, even at high speed. But they shouldn't be left disconnected from the country's economic core, either. Extending the corridor from Windsor through to where Project Alto picks up creates a continuous high-speed rail spine from Windsor to Qu&eacute;bec City. For London and Windsor, that means real intercity connectivity, dramatically reduced travel times to major centres, and integration into a national network.</p>
         <p>The second goal is to turn the Greater Golden Horseshoe into a true megaregion. Hamilton, Kitchener-Waterloo, Niagara, Barrie, and Oshawa — connected to Toronto and to Pearson Airport, the country's busiest airport and one of the largest employment zones in the GTA — all within an hour of each other. At that scale the region begins to function as a single labour market, and the density of connections makes that possible in a way that no single corridor can.</p>
+        <h3>What this means</h3>
         <p>What makes this more than a transit project is what happens around the stations. Every stop on this network becomes an anchor point for local transit investment. Cities like Hamilton, Kitchener, London, and Barrie can build local systems that connect into HSR rather than trying to justify them on ridership alone. More importantly, these stations can serve as the hubs for a restored provincial bus network — reaching rural communities and smaller towns across southwestern Ontario that have lost intercity service. As high-speed rail makes getting to Kitchener or London faster and easier, those bus connections become more useful, more viable, and better used. The network extends well beyond the tracks.</p>
         <p>The economic case follows from all of this. Employers in every station city gain access to a labour pool that spans the region. Workers gain genuine choice about where to live without sacrificing what they can reach. The land around major stations becomes more valuable, generating development that compounds over time. Rural and smaller communities gain access to economic opportunities that distance currently puts out of reach. This is not a single infrastructure investment — it is a platform for growth across the province.</p>
+        <h3>We can do it</h3>
         <p>More than 20 million Canadians live along one of the flattest, most obvious corridors for high-speed rail in the developed world. Our peer countries have had networks like this for decades. The gap is not geography or population — it is ambition. Critics are right that Canada has allowed cost disease to inflate the price of public infrastructure. But the answer is to fix how we build, not to stop building. An advanced society serious about its future invests in infrastructure that expands opportunity, connects people, and compounds its value over generations.</p>
       </div>
 
