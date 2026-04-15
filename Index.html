@@ -57,12 +57,14 @@ body { font-family:'PPPangramSans',Arial,sans-serif; font-weight:400; background
   left: 12px;
   bottom: 10px;
   z-index: 1000;
+  display: block;
   background: rgba(242, 244, 247, 0.94);
   border: 1px solid #DFE1E4;
   border-radius: 12px;
   padding: 8px 10px;
   font-size: 14px;
   color: #2D2D2D;
+  text-decoration: none;
   line-height: 1.35;
   box-shadow: 0 2px 10px rgba(0,0,0,0.12);
 }
@@ -601,7 +603,7 @@ body { font-family:'PPPangramSans',Arial,sans-serif; font-weight:400; background
 
 <!-- Overview button -->
 <button id="info-btn" onclick="openModal()" title="About this map" aria-label="Open information panel">What is this?</button>
-<div id="credit-tag"><span class="credit-name">Made by Eric Lombardi</span>Exploring a run for Ontario Liberal Party leader</div>
+<a id="credit-tag" href="https://ericforolp.ca" target="_blank" rel="noopener noreferrer"><span class="credit-name">Made by Eric Lombardi</span>Exploring a run for Ontario Liberal Party leader</a>
 
 <!-- ════════════════════════════════════════
      LEGEND
