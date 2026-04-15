@@ -583,7 +583,7 @@ body { font-family:'PPPangramSans',Arial,sans-serif; font-weight:400; background
   .choice-grid { grid-template-columns: 1fr; }
 
   #legend {
-    bottom: 10px;
+    bottom: 74px;
     right: 6px;
     min-width: 170px;
     max-height: 42vh;
@@ -591,6 +591,18 @@ body { font-family:'PPPangramSans',Arial,sans-serif; font-weight:400; background
   }
 
   #legend-toggle { display: block; }
+
+  #credit-tag {
+    left: 6px;
+    right: 6px;
+    bottom: 6px;
+    max-width: none;
+    font-size: 12px;
+  }
+
+  #credit-tag .credit-name {
+    font-size: 13px;
+  }
 }
 </style>
 </head>
@@ -1297,6 +1309,12 @@ function toggleLegend() {
   const btn  = document.getElementById('legend-toggle');
   body.style.display = legendOpen ? '' : 'none';
   btn.textContent    = legendOpen ? '\u25BC' : '\u25B2';
+}
+
+if (window.matchMedia('(max-width: 600px)').matches) {
+  legendOpen = false;
+  document.getElementById('legend-body').style.display = 'none';
+  document.getElementById('legend-toggle').textContent = '\u25B2';
 }
 </script>
 </body>
