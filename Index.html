@@ -600,7 +600,7 @@ body { font-family:'PPPangramSans',Arial,sans-serif; font-weight:400; background
 <div id="map"></div>
 
 <!-- Overview button -->
-<button id="info-btn" onclick="openModal()" title="About this map" aria-label="Open information panel">What is this?</button>
+<button id="info-btn" onclick="openModal()" title="About this map" aria-label="Open information panel">More info</button>
 <div id="credit-tag"><span class="credit-name">Made by Eric Lombardi</span>Exploring a run for Ontario Liberal Party leader</div>
 
 <!-- ════════════════════════════════════════
@@ -656,7 +656,7 @@ body { font-family:'PPPangramSans',Arial,sans-serif; font-weight:400; background
 <!-- ════════════════════════════════════════
      MODAL
      ════════════════════════════════════════ -->
-<div id="modal-overlay" class="hidden" role="dialog" aria-modal="true" aria-label="About this map">
+<div id="modal-overlay" role="dialog" aria-modal="true" aria-label="About this map">
   <div id="modal">
 
     <!-- Header -->
@@ -678,7 +678,6 @@ body { font-family:'PPPangramSans',Arial,sans-serif; font-weight:400; background
     <!-- Tabs -->
     <div class="modal-tabs" role="tablist">
       <button class="tab-btn active" role="tab" onclick="switchTab('overview', this)">Overview</button>
-      <button class="tab-btn"        role="tab" onclick="switchTab('choice', this)">The Choice</button>
       <button class="tab-btn"        role="tab" onclick="switchTab('times', this)">Travel Times</button>
       <button class="tab-btn"        role="tab" onclick="switchTab('costs', this)">Cost Assumptions</button>
     </div>
@@ -690,76 +689,6 @@ body { font-family:'PPPangramSans',Arial,sans-serif; font-weight:400; background
       <div class="tab-pane active" id="pane-overview" role="tabpanel">
         <p>This is a map of a possible high-speed rail network for Southern Ontario. It's here so you can explore it — see how the region connects, how travel times change, and what a network like this could mean for how Ontario works.</p>
         <p>This is not a policy platform. It's a starting point for a conversation about what Ontario should build.</p>
-      </div>
-
-      <!-- The Choice -->
-      <div class="tab-pane" id="pane-choice" role="tabpanel">
-        <table class="data-table choice-table" style="margin-bottom:18px;">
-          <thead>
-            <tr>
-              <th>Value proposition</th>
-              <th>401 Tunnel (~$100B)</th>
-              <th>High-Speed Rail (~$97B)</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Serves broad population</td>
-              <td>No — fewer than 10% of regional commuters</td>
-              <td>Yes — connects all major economic centres of Southern Ontario</td>
-            </tr>
-            <tr>
-              <td>Durable congestion relief</td>
-              <td>No — induced demand restores congestion within years</td>
-              <td>Yes — reduces pressure across the entire highway network</td>
-            </tr>
-            <tr>
-              <td>Labour market expansion</td>
-              <td>No — serves existing geography, no new reach</td>
-              <td>Yes — dramatically expands the Greater Golden Horseshoe catchment</td>
-            </tr>
-            <tr>
-              <td>Land value &amp; economic uplift</td>
-              <td>No — no substantial productivity or land-value upside</td>
-              <td>Yes — economic capture and gains around station areas</td>
-            </tr>
-            <tr>
-              <td>Scales with growth</td>
-              <td>No — fixed capacity, fixed geography</td>
-              <td>Yes — system designed to grow alongside demand</td>
-            </tr>
-            <tr>
-              <td>Permanently changes intercity travel</td>
-              <td>No — incremental, corridor-specific</td>
-              <td>Yes — permanently alters travel time between cities</td>
-            </tr>
-            <tr>
-              <td>Anchors local transit</td>
-              <td>No — standalone highway infrastructure</td>
-              <td>Yes — anchors transit expansion in southwestern Ontario cities</td>
-            </tr>
-            <tr>
-              <td>Serves rural &amp; smaller communities</td>
-              <td>No — limited to highway corridor users</td>
-              <td>Yes — extends connectivity beyond station cities</td>
-            </tr>
-            <tr>
-              <td>Changes economic relationship between regions</td>
-              <td>No — does not alter regional economic dynamics</td>
-              <td>Yes — integrates labour and economic activity across the corridor</td>
-            </tr>
-          </tbody>
-        </table>
-        <h3>Problem</h3>
-        <p>When a trip that takes 90 minutes by car takes 25 by rail, something more fundamental than commute time changes. The cities on either end stop feeling like separate places and start functioning as one. Workers can live in Hamilton and reach a job in Kitchener. Students in Oshawa can access universities across the corridor. Families in Barrie aren't choosing between affordability and opportunity — they can have both. But getting there requires being honest about what this network is actually trying to do — because there are two distinct goals, and they're worth naming separately.</p>
-        <h3>Goals</h3>
-        <p>The first is to connect southwestern Ontario to the country. London and Windsor will not become daily commuter cities for the Greater Golden Horseshoe — the distances are simply too great for that, even at high speed. But they shouldn't be left disconnected from the country's economic core, either. Extending the corridor from Windsor through to where Project Alto picks up creates a continuous high-speed rail spine from Windsor to Qu&eacute;bec City. For London and Windsor, that means real intercity connectivity, dramatically reduced travel times to major centres, and integration into a national network.</p>
-        <p>The second goal is to turn the Greater Golden Horseshoe into a true megaregion. Hamilton, Kitchener-Waterloo, Niagara, Barrie, and Oshawa — connected to Toronto and to Pearson Airport, the country's busiest airport and one of the largest employment zones in the GTA — all within an hour of each other. At that scale the region begins to function as a single labour market, and the density of connections makes that possible in a way that no single corridor can.</p>
-        <h3>What this means</h3>
-        <p>What makes this more than a transit project is what happens around the stations. Every stop on this network becomes an anchor point for local transit investment. Cities like Hamilton, Kitchener, London, and Barrie can build local systems that connect into HSR rather than trying to justify them on ridership alone. More importantly, these stations can serve as the hubs for a restored provincial bus network — reaching rural communities and smaller towns across southwestern Ontario that have lost intercity service. As high-speed rail makes getting to Kitchener or London faster and easier, those bus connections become more useful, more viable, and better used. The network extends well beyond the tracks.</p>
-        <p>The economic case follows from all of this. Employers in every station city gain access to a labour pool that spans the region. Workers gain genuine choice about where to live without sacrificing what they can reach. The land around major stations becomes more valuable, generating development that compounds over time. Rural and smaller communities gain access to economic opportunities that distance currently puts out of reach. This is not a single infrastructure investment — it is a platform for growth across the province.</p>
-        <h3>We can do it</h3>
-        <p>More than 20 million Canadians live along one of the flattest, most obvious corridors for high-speed rail in the developed world. Our peer countries have had networks like this for decades. The gap is not geography or population — it is ambition. Critics are right that Canada has allowed cost disease to inflate the price of public infrastructure. But the answer is to fix how we build, not to stop building. An advanced society serious about its future invests in infrastructure that expands opportunity, connects people, and compounds its value over generations.</p>
       </div>
 
       <!-- Travel Times -->
