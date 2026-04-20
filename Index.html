@@ -57,12 +57,14 @@ body { font-family:'PPPangramSans',Arial,sans-serif; font-weight:400; background
   left: 12px;
   bottom: 10px;
   z-index: 1000;
+  display: block;
   background: rgba(242, 244, 247, 0.94);
   border: 1px solid #DFE1E4;
   border-radius: 12px;
   padding: 8px 10px;
   font-size: 14px;
   color: #2D2D2D;
+  text-decoration: none;
   line-height: 1.35;
   box-shadow: 0 2px 10px rgba(0,0,0,0.12);
 }
@@ -581,7 +583,7 @@ body { font-family:'PPPangramSans',Arial,sans-serif; font-weight:400; background
   .choice-grid { grid-template-columns: 1fr; }
 
   #legend {
-    bottom: 10px;
+    bottom: 74px;
     right: 6px;
     min-width: 170px;
     max-height: 42vh;
@@ -589,6 +591,18 @@ body { font-family:'PPPangramSans',Arial,sans-serif; font-weight:400; background
   }
 
   #legend-toggle { display: block; }
+
+  #credit-tag {
+    left: 6px;
+    right: 6px;
+    bottom: 6px;
+    max-width: none;
+    font-size: 12px;
+  }
+
+  #credit-tag .credit-name {
+    font-size: 13px;
+  }
 }
 </style>
 </head>
@@ -1224,6 +1238,12 @@ function toggleLegend() {
   const btn  = document.getElementById('legend-toggle');
   body.style.display = legendOpen ? '' : 'none';
   btn.textContent    = legendOpen ? '\u25BC' : '\u25B2';
+}
+
+if (window.matchMedia('(max-width: 600px)').matches) {
+  legendOpen = false;
+  document.getElementById('legend-body').style.display = 'none';
+  document.getElementById('legend-toggle').textContent = '\u25B2';
 }
 </script>
 </body>
