@@ -17,6 +17,7 @@
   --ph1:    #E81E25;
   --ph2:    #2D2D2D;
   --alto:   #228B22;
+  --altoAlt:#2563EB;
   --bg:     #F2F4F7;
   --black:  #101010;
   --grey:   #2D2D2D;
@@ -163,6 +164,10 @@ body { font-family:'PPPangramSans',Arial,sans-serif; font-weight:400; background
   border-top: 3px dashed #228B22;
 }
 
+.l-line-dashed.alt {
+  border-top-color: #2563EB;
+}
+
 .speed-box {
   margin-top: 6px;
   display: grid;
@@ -236,6 +241,13 @@ body { font-family:'PPPangramSans',Arial,sans-serif; font-weight:400; background
   text-shadow:0 1px 3px rgba(242,244,247,.99),0 0 10px rgba(242,244,247,.95) !important;
 }
 .alto-label::before { display:none !important; }
+.alto-alt-label {
+  background:transparent !important; border:none !important; box-shadow:none !important;
+  font-family:'PPPangramSans',Arial,sans-serif !important; font-weight:500 !important;
+  font-size:11px !important; font-style:italic; color:var(--altoAlt) !important; white-space:nowrap; pointer-events:none;
+  text-shadow:0 1px 3px rgba(242,244,247,.99),0 0 10px rgba(242,244,247,.95) !important;
+}
+.alto-alt-label::before { display:none !important; }
 
 /* ── Modal overlay ── */
 #modal-overlay {
@@ -355,6 +367,7 @@ body { font-family:'PPPangramSans',Arial,sans-serif; font-weight:400; background
   font-family:'PPPangramSans',Arial,sans-serif;
   font-size: 14px;
   font-weight: 700;
+  text-align: center;
   cursor: pointer;
   transition: background 0.18s, transform 0.1s;
 }
@@ -373,6 +386,7 @@ body { font-family:'PPPangramSans',Arial,sans-serif; font-weight:400; background
   font-weight: 600;
   cursor: pointer;
   text-decoration: none;
+  text-align: center;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -641,6 +655,10 @@ body { font-family:'PPPangramSans',Arial,sans-serif; font-weight:400; background
       <div class="l-line-dashed"></div>
       <span>Alto (Federal)</span>
     </div>
+    <div class="legend-row">
+      <div class="l-line-dashed alt"></div>
+      <span>Alto Alternate</span>
+    </div>
 
     <div class="legend-section">Station Tiers</div>
     <div class="legend-row">
@@ -654,6 +672,10 @@ body { font-family:'PPPangramSans',Arial,sans-serif; font-weight:400; background
     <div class="legend-row">
       <div class="l-dot" style="width:11px;height:11px;background:#6E6E6E;"></div>
       <span>Regional</span>
+    </div>
+    <div class="legend-row">
+      <div class="l-dot" style="width:11px;height:11px;background:#2563EB;"></div>
+      <span>Alto Alternate Hub</span>
     </div>
 
     <div class="legend-section">Speed Assumptions</div>
@@ -885,13 +907,15 @@ L.tileLayer(
 /* ──────────────────────────────────────────────────────
    Colours & coordinates
 ────────────────────────────────────────────────────── */
-const SOHSR = '#E81E25', GGH = '#101010', ALTO = '#228B22';
+const SOHSR = '#E81E25', GGH = '#101010', ALTO = '#228B22', ALTO_ALT = '#2563EB';
 
 const C = {
   windsor:[42.317,-83.026], chatham:[42.404,-82.191], london:[42.984,-81.243],
   kitchener:[43.451,-80.492], pearson:[43.677,-79.631], toronto:[43.645,-79.380],
   oshawa:[43.897,-78.866], hamilton:[43.255,-79.869], niagara:[43.090,-79.081],
   barrie:[44.389,-79.690], peterborough:[44.300,-78.320], ottawa:[45.421,-75.697],
+  belleville:[44.166,-77.383], kingston:[44.231,-76.486], brockville:[44.591,-75.685],
+  cornwall:[45.022,-74.731], montreal:[45.502,-73.567],
 };
 
 /* ──────────────────────────────────────────────────────
@@ -901,8 +925,25 @@ const sec  = t => `<div class="pu-section">${t}</div>`;
 const note = t => `<div class="pu-note">${t}</div>`;
 const bdg  = (t,bg,col,bdr) => `<span class="pu-badge" style="background:${bg};color:${col};border:1px solid ${bdr}">${t}</span>`;
 
-function tRow(dest, time) {
-  return `<div class="pu-row"><span class="k">${dest}</span><span class="v">${time}</span></div>`;
+function tRow(dest, time, express=false) {
+  const bolt = express ? '<span style="color:#E81E25;margin-right:3px;">⚡</span>' : '';
+  return `<div class="pu-row"><span class="k">${bolt}${dest}</span><span class="v">${time}</span></div>`;
+}
+
+/* Express stop list — only these stations get the ⚡ marker. */
+const EXPRESS_NAMES = new Set([
+  'Windsor','London','Kitchener','Hamilton',
+  'Toronto','Toronto Union',
+  'Kingston','Ottawa','Montréal','Montreal'
+]);
+
+function destIsExpress(rawName) {
+  const clean = String(rawName)
+    .replace(/^From\s+/, '')
+    .replace(/\s*\(.*$/, '')
+    .replace(/\s*→.*$/, '')
+    .trim();
+  return EXPRESS_NAMES.has(clean);
 }
 
 /* ──────────────────────────────────────────────────────
@@ -915,12 +956,12 @@ function tRow(dest, time) {
 
 /* ── Southern Ontario HSR (Red) ── */
 const soHsrSegments = [
-  {name:'Windsor \u2192 Chatham',       from:C.windsor,  to:C.chatham,   km:80,  expAvg:235, expMins:20, regAvg:175, regMins:25, regStops:1, note:'Regional calls at intermediate stop.'},
-  {name:'Chatham \u2192 London',        from:C.chatham,  to:C.london,    km:100, expAvg:240, expMins:25, regAvg:185, regMins:31, regStops:0, note:'Open corridor, flat terrain.'},
-  {name:'London \u2192 Kitchener',      from:C.london,   to:C.kitchener, km:110, expAvg:245, expMins:27, regAvg:190, regMins:34, regStops:1, note:'Regional calls at Woodstock.'},
-  {name:'Kitchener \u2192 Pearson',     from:C.kitchener,to:C.pearson,   km:85,  expAvg:200, expMins:26, regAvg:165, regMins:32, regStops:1, note:'Regional calls at Brampton/Mississauga.'},
-  {name:'Pearson \u2192 Toronto Union', from:C.pearson,  to:C.toronto,   km:30,  expAvg:150, expMins:12, regAvg:130, regMins:14, regStops:0, note:'Urban grade-separated approach.'},
-  {name:'Toronto Union \u2192 Oshawa',  from:C.toronto,  to:C.oshawa,    km:65,  expAvg:160, expMins:24, regAvg:140, regMins:30, regStops:1, note:'Regional calls at Pickering/Ajax.'},
+  {name:'Windsor → Chatham',       from:C.windsor,  to:C.chatham,   km:80,  expAvg:235, expMins:20, regAvg:175, regMins:25, regStops:1, note:'Regional calls at intermediate stop.'},
+  {name:'Chatham → London',        from:C.chatham,  to:C.london,    km:100, expAvg:240, expMins:25, regAvg:185, regMins:31, regStops:0, note:'Open corridor, flat terrain.'},
+  {name:'London → Kitchener',      from:C.london,   to:C.kitchener, km:110, expAvg:245, expMins:27, regAvg:190, regMins:34, regStops:1, note:'Regional calls at Woodstock.'},
+  {name:'Kitchener → Pearson',     from:C.kitchener,to:C.pearson,   km:85,  expAvg:200, expMins:26, regAvg:165, regMins:32, regStops:1, note:'Regional calls at Brampton/Mississauga.'},
+  {name:'Pearson → Toronto Union', from:C.pearson,  to:C.toronto,   km:30,  expAvg:150, expMins:12, regAvg:130, regMins:14, regStops:0, note:'Urban grade-separated approach.'},
+  {name:'Toronto Union → Oshawa',  from:C.toronto,  to:C.oshawa,    km:65,  expAvg:160, expMins:24, regAvg:140, regMins:30, regStops:1, note:'Regional calls at Pickering/Ajax.'},
 ];
 
 soHsrSegments.forEach(seg => {
@@ -928,22 +969,22 @@ soHsrSegments.forEach(seg => {
   L.polyline([seg.from,seg.to],{color:SOHSR,weight:5,opacity:0.93,smoothFactor:1})
     .bindPopup(`
       <div class="pu-title">${seg.name}</div>
-      <div class="pu-sub">${seg.km} km \u00b7 Southern Ontario HSR \u00b7 click a station for full journey times</div>
-      ${sec('Journey times \u2014 this segment')}
+      <div class="pu-sub">${seg.km} km · Southern Ontario HSR · click a station for full journey times</div>
+      ${sec('Journey times — this segment')}
       <div class="seg-time">
-        <div><div class="lbl">\u26a1 Express</div><div class="val exp">${seg.expMins} min</div></div>
-        <div><div class="lbl">\u25ce Regional</div><div class="val reg">${seg.regMins} min</div></div>
-        <div class="subnote">${seg.regStops} intermediate stop${seg.regStops!==1?'s':''} on regional \u00b7 ~4 min each \u00b7 ${seg.note}</div>
+        <div><div class="lbl">⚡ Express</div><div class="val exp">${seg.expMins} min</div></div>
+        <div><div class="lbl">◎ Regional</div><div class="val reg">${seg.regMins} min</div></div>
+        <div class="subnote">${seg.regStops} intermediate stop${seg.regStops!==1?'s':''} on regional · ~4 min each · ${seg.note}</div>
       </div>`,{maxWidth:300}).addTo(map);
 });
 
 /* ── Greater Golden Horseshoe HSR (Black) ── */
 const gghSegments = [
-  {name:'Toronto \u2192 Hamilton',       from:C.toronto,  to:C.hamilton,  km:70,  expAvg:210, expMins:20, regAvg:165, regMins:25, regStops:1, note:'Regional calls at Oakville/Burlington.'},
-  {name:'Hamilton \u2192 Niagara Falls', from:C.hamilton, to:C.niagara,   km:85,  expAvg:180, expMins:28, regAvg:145, regMins:35, regStops:1, note:'Regional calls at St. Catharines.'},
-  {name:'Pearson \u2192 Hamilton',       from:C.pearson,  to:C.hamilton,  km:65,  expAvg:190, expMins:21, regAvg:150, regMins:26, regStops:0, note:'No intermediate stops.'},
-  {name:'Hamilton \u2192 Kitchener',     from:C.hamilton, to:C.kitchener, km:60,  expAvg:205, expMins:18, regAvg:165, regMins:22, regStops:0, note:'Completes GTHA triangle.'},
-  {name:'Pearson \u2192 Barrie',         from:C.pearson,  to:C.barrie,    km:115, expAvg:220, expMins:31, regAvg:180, regMins:38, regStops:1, note:'Regional calls at Bradford/Innisfil.'},
+  {name:'Toronto → Hamilton',       from:C.toronto,  to:C.hamilton,  km:70,  expAvg:210, expMins:20, regAvg:165, regMins:25, regStops:1, note:'Regional calls at Oakville/Burlington.'},
+  {name:'Hamilton → Niagara Falls', from:C.hamilton, to:C.niagara,   km:85,  expAvg:180, expMins:28, regAvg:145, regMins:35, regStops:1, note:'Regional calls at St. Catharines.'},
+  {name:'Pearson → Hamilton',       from:C.pearson,  to:C.hamilton,  km:65,  expAvg:190, expMins:21, regAvg:150, regMins:26, regStops:0, note:'No intermediate stops.'},
+  {name:'Hamilton → Kitchener',     from:C.hamilton, to:C.kitchener, km:60,  expAvg:205, expMins:18, regAvg:165, regMins:22, regStops:0, note:'Completes GTHA triangle.'},
+  {name:'Pearson → Barrie',         from:C.pearson,  to:C.barrie,    km:115, expAvg:220, expMins:31, regAvg:180, regMins:38, regStops:1, note:'Regional calls at Bradford/Innisfil.'},
 ];
 
 gghSegments.forEach(seg => {
@@ -951,48 +992,146 @@ gghSegments.forEach(seg => {
   L.polyline([seg.from,seg.to],{color:GGH,weight:5,opacity:0.88,smoothFactor:1})
     .bindPopup(`
       <div class="pu-title">${seg.name}</div>
-      <div class="pu-sub">${seg.km} km \u00b7 Greater Golden Horseshoe HSR \u00b7 click a station for full journey times</div>
-      ${sec('Journey times \u2014 this segment')}
+      <div class="pu-sub">${seg.km} km · Greater Golden Horseshoe HSR · click a station for full journey times</div>
+      ${sec('Journey times — this segment')}
       <div class="seg-time">
-        <div><div class="lbl">\u26a1 Express</div><div class="val exp">${seg.expMins} min</div></div>
-        <div><div class="lbl">\u25ce Regional</div><div class="val reg">${seg.regMins} min</div></div>
-        <div class="subnote">${seg.regStops} intermediate stop${seg.regStops!==1?'s':''} on regional \u00b7 ~4 min each \u00b7 ${seg.note}</div>
+        <div><div class="lbl">⚡ Express</div><div class="val exp">${seg.expMins} min</div></div>
+        <div><div class="lbl">◎ Regional</div><div class="val reg">${seg.regMins} min</div></div>
+        <div class="subnote">${seg.regStops} intermediate stop${seg.regStops!==1?'s':''} on regional · ~4 min each · ${seg.note}</div>
       </div>`,{maxWidth:300}).addTo(map);
 });
 
 /* ── Alto (Federal — Forest Green dashed) ── */
-L.polyline([C.oshawa,C.peterborough,C.ottawa],{color:ALTO,weight:12,opacity:0.08}).addTo(map);
-L.polyline([C.oshawa,C.peterborough,C.ottawa],{color:ALTO,weight:4,opacity:0.72,dashArray:'12 5'})
+const altoPath = [C.oshawa, C.peterborough, C.ottawa, C.montreal];
+L.polyline(altoPath,{color:ALTO,weight:12,opacity:0.08}).addTo(map);
+L.polyline(altoPath,{color:ALTO,weight:4,opacity:0.72,dashArray:'12 5'})
   .bindPopup(`
     <div class="pu-title">Project Alto</div>
-    <div class="pu-sub">Federal HSR \u00b7 Toronto \u2013 Ottawa</div>
+    <div class="pu-sub">Federal HSR · Toronto – Montréal</div>
     <div class="seg-time" style="margin-top:10px">
-      <div><div class="lbl">\u26a1 Express</div></div>
-      <div><div class="lbl">\u25ce Regional</div></div>
+      <div><div class="lbl">⚡ Express</div></div>
+      <div><div class="lbl">◎ Regional</div></div>
     </div>
-    ${tRow('Toronto \u2192 Ottawa','2h 05m / 2h 45m')}
-    ${tRow('Toronto \u2192 Peterborough','~31m / ~43m')}
-    ${note('Phase 1 construction: Ottawa\u2013Montr\u00e9al, 2029. Alignment via Peterborough \u2014 inland, not lakeshore.')}`,{maxWidth:290})
+    ${tRow('Toronto → Ottawa','2h 05m / 2h 45m')}
+    ${tRow('Ottawa → Montréal','~58m / ~1h 10m')}
+    ${tRow('Toronto → Montréal','~3h 03m / ~3h 55m')}
+    ${tRow('Toronto → Peterborough','~31m / ~43m')}
+    ${note('Phase 1 construction: Ottawa–Montréal, 2029. Alignment via Peterborough — inland, not lakeshore.')}`,{maxWidth:290})
   .addTo(map);
 
 // Alto stations (Peterborough, Ottawa)
-[{coords:C.peterborough,name:'Peterborough',dir:'right',
-  times:[['From Toronto','~31m'],['From Oshawa','~20m'],['From Ottawa','~1h 25m']],
-  note:'Alto corridor stop. Inland alignment between Oshawa and Ottawa.'},
- {coords:C.ottawa,name:'Ottawa \u2192',dir:'right',
-  times:[['From Toronto','~2h 05m'],['From Oshawa','~1h 25m'],['From Peterborough','~1h 05m']],
-  note:'Eastern map limit. Alto continues to Montr\u00e9al & Qu\u00e9bec City.'},
+[{coords:C.peterborough,name:'Peterborough',dir:'right', express:false,
+  times:[['Toronto','~31m'],['Oshawa','~20m'],['Ottawa','~1h 05m'],['Montréal','~2h 03m']],
+  note:'Alto corridor stop. Inland alignment between Oshawa and Ottawa. Regional service only.'},
+ {coords:C.ottawa,name:'Ottawa →',dir:'right', express:true,
+  times:[['Toronto','~2h 05m'],['Montréal','~58m'],['Peterborough','~1h 05m'],['Oshawa','~1h 25m']],
+  note:'Express stop on the Alto corridor. Direct service to Toronto and Montréal.'},
 ].forEach(s=>{
-  const timesHtml = s.times.map(([d,t])=>tRow(d,t)).join('');
+  const timesHtml = s.times.map(([d,t])=>tRow(d,t, s.express && destIsExpress(d))).join('');
+  const timeLabel = s.express ? '⚡ Express journey times' : '◎ Regional journey times';
   L.circleMarker(s.coords,{radius:10,fillColor:ALTO,color:'#fff',weight:2.5,opacity:1,fillOpacity:1})
     .bindPopup(`
-      <div class="pu-title">${s.name.replace(' \u2192','')}</div>
+      <div class="pu-title">${s.name.replace(' →','')}</div>
       <div class="pu-sub">Project Alto Station</div>
       ${note(s.note)}
-      ${sec('\u26a1 Express journey times')}${timesHtml}
+      ${sec(timeLabel)}${timesHtml}
       ${bdg('Project Alto','#dcfce7','#166534','#86efac')}`,{maxWidth:260})
     .addTo(map);
   L.tooltip({permanent:true,direction:s.dir,className:'alto-label',offset:[9,0]})
+    .setContent(s.name).setLatLng(s.coords).addTo(map);
+});
+
+/* ── Alto Alternate (Blue dashed — visual only, no popups) ──
+   Oshawa → Belleville → Kingston → Brockville,
+   then Brockville → Cornwall → Montréal AND Brockville → Ottawa
+*/
+const altoAltPaths = [
+  [C.oshawa, C.belleville, C.kingston, C.brockville],
+  [C.brockville, C.cornwall, C.montreal],
+  [C.brockville, C.ottawa],
+];
+
+altoAltPaths.forEach(path => {
+  L.polyline(path, {color:ALTO_ALT, weight:12, opacity:0.08, smoothFactor:1}).addTo(map);
+  L.polyline(path, {color:ALTO_ALT, weight:4, opacity:0.78, dashArray:'12 5', smoothFactor:1}).addTo(map);
+});
+
+/* ── Alto Alternate Hubs (Blue) ──
+   Time math: rural avg ~245 km/h express / ~200 km/h regional,
+   urban approaches slower, ~2 min dwell at intermediate stops.
+   Distances (km): T→Osh 65 · Osh→Bel 150 · Bel→Kin 80 · Kin→Brk 85 ·
+                   Brk→Cor 80 · Cor→Mtl 110 · Brk→Ott 110.
+*/
+const altoAltStations = [
+  {coords:C.belleville, name:'Belleville', dir:'top', r:9, express:false,
+   sub:'Alto Alternate · Regional Service',
+   note:'Regional service only — express trains skip Belleville.',
+   times:[
+     ['Toronto Union',     '~1h 20m', false],
+     ['Oshawa',            '~45m',    false],
+     ['Kingston',          '~25m',    false],
+     ['Brockville',        '~55m',    false],
+     ['Cornwall',          '~1h 25m', false],
+     ['Montréal',          '~2h 05m', false],
+   ]},
+  {coords:C.kingston, name:'Kingston', dir:'right', r:11, express:true,
+   sub:'Alto Alternate · Express Stop',
+   note:'Express stop on Toronto Union – Montréal corridor.',
+   times:[
+     ['Toronto Union',          '~1h 25m', true],
+     ['Oshawa',                 '~1h 00m', false],
+     ['Brockville',             '~21m',    false],
+     ['Ottawa (via Brockville)','~52m',    false],
+     ['Montréal',               '~1h 10m', true],
+   ]},
+  {coords:C.brockville, name:'Brockville', dir:'top', r:9, express:false,
+   sub:'Alto Alternate · Regional Junction',
+   note:'Junction: Ottawa branches off here; mainline continues to Cornwall and Montréal.',
+   times:[
+     ['Toronto Union',     '~2h 15m', false],
+     ['Kingston',          '~26m',    false],
+     ['Ottawa',            '~37m',    false],
+     ['Cornwall',          '~24m',    false],
+     ['Montréal',          '~1h 05m', false],
+   ]},
+  {coords:C.cornwall, name:'Cornwall', dir:'bottom', r:9, express:false,
+   sub:'Alto Alternate · Regional Service',
+   note:'Regional service only — express trains skip Cornwall.',
+   times:[
+     ['Toronto Union',     '~2h 40m', false],
+     ['Kingston',          '~55m',    false],
+     ['Brockville',        '~24m',    false],
+     ['Montréal',          '~37m',    false],
+   ]},
+  {coords:C.montreal, name:'Montréal', dir:'right', r:11, express:true,
+   sub:'Eastern Terminus · Alto & Alto Alternate',
+   note:'Eastern terminus. Express service via Kingston (Alto Alternate) and via Ottawa (Alto).',
+   times:[
+     ['Toronto Union (via Kingston)',  '~2h 35m', true],
+     ['Toronto Union (via Ottawa)',    '~3h 03m', true],
+     ['Ottawa',                        '~58m',    true],
+     ['Kingston',                      '~1h 10m', true],
+     ['Oshawa',                        '~2h 09m', false],
+     ['Brockville',                    '~1h 05m', false],
+     ['Cornwall',                      '~37m',    false],
+   ]},
+];
+
+altoAltStations.forEach(s => {
+  const timesHtml = s.times.map(([d,t,exp])=>tRow(d,t, s.express && exp===true)).join('');
+  const timeLabel = s.express ? '⚡ Express journey times' : '◎ Regional journey times';
+  // Halo
+  L.circleMarker(s.coords,{radius:s.r+4,fillColor:ALTO_ALT,color:'white',weight:0,opacity:0,fillOpacity:0.18}).addTo(map);
+  // Marker
+  L.circleMarker(s.coords,{radius:s.r,fillColor:ALTO_ALT,color:'#fff',weight:2.5,opacity:1,fillOpacity:1})
+    .bindPopup(`
+      <div class="pu-title">${s.name}</div>
+      <div class="pu-sub">${s.sub}</div>
+      ${note(s.note)}
+      ${sec(timeLabel)}${timesHtml}
+      <div style="margin-top:10px">${bdg('Alto Alternate','#dbeafe','#1e40af','#93c5fd')}</div>`,{maxWidth:280})
+    .addTo(map);
+  L.tooltip({permanent:true,direction:s.dir,className:'alto-alt-label',offset:[9,0]})
     .setContent(s.name).setLatLng(s.coords).addTo(map);
 });
 
@@ -1004,9 +1143,9 @@ const stations = [
 
   // ── PEARSON (Core Hub · 4 connections) ──
   {name:'Pearson International', coords:C.pearson, tier:'core', r:14, dir:'right', proposed:false,
-   connections:4, sub:'Core Hub \u00b7 4 Connections',
-   serves:['Windsor\u2013Oshawa spine','Hamilton branch','Barrie spur','Toronto Union stub'],
-   note:'Core hub. Integrated airport terminal.',
+   connections:4, sub:'Core Hub · 4 Connections', express:false,
+   serves:['Windsor–Oshawa spine','Hamilton branch','Barrie spur','Toronto Union stub'],
+   note:'Core hub. Integrated airport terminal. Express trains skip Pearson — regional service only.',
    chatham:false,
    times:[
      ['Toronto Union',    '12m'],
@@ -1021,8 +1160,8 @@ const stations = [
 
   // ── HAMILTON (Core Hub · 4 connections) ──
   {name:'Hamilton', coords:C.hamilton, tier:'core', r:14, dir:'bottom', proposed:false,
-   connections:4, sub:'Core Hub \u00b7 4 Connections',
-   serves:['Toronto\u2013Niagara branch','Pearson\u2013Hamilton branch','Hamilton\u2013Kitchener branch','Niagara corridor'],
+   connections:4, sub:'Core Hub · 4 Connections', express:true,
+   serves:['Toronto–Niagara branch','Pearson–Hamilton branch','Hamilton–Kitchener branch','Niagara corridor'],
    note:'Major junction. Gateway to Niagara & KW branches. Local BRT/LRT connection.',
    chatham:false,
    times:[
@@ -1038,8 +1177,8 @@ const stations = [
 
   // ── TORONTO (Major Hub · 3 connections) ──
   {name:'Toronto Union / East Harbour', coords:C.toronto, tier:'major', r:12, dir:'top', proposed:false,
-   connections:3, sub:'Major Hub \u00b7 3 Connections',
-   serves:['Windsor\u2013Oshawa spine','Toronto\u2013Niagara branch','Project Alto (via Oshawa)'],
+   connections:3, sub:'Major Hub · 3 Connections', express:true,
+   serves:['Windsor–Oshawa spine','Toronto–Niagara branch','Project Alto (via Oshawa)','Alto Alternate (via Oshawa)'],
    note:'LVC opportunity at East Harbour. TTC & GO interchange.',
    chatham:false,
    times:[
@@ -1051,13 +1190,16 @@ const stations = [
      ['London',           '1h 05m'],
      ['Windsor',          '1h 50m'],
      ['Peterborough (Alto)','~31m'],
-     ['Ottawa (Alto)',    '~2h 05m'],
+     ['Ottawa (via Alto)',    '~2h 05m'],
+     ['Ottawa (via Alto Alt)','~2h 20m'],
+     ['Kingston (Alto Alt)','~1h 25m'],
+     ['Montréal (Alto Alt)','~2h 35m'],
    ]},
 
   // ── KITCHENER (Major Hub · 3 connections) ──
-  {name:'Kitchener\u2013Waterloo', coords:C.kitchener, tier:'major', r:12, dir:'left', proposed:false,
-   connections:3, sub:'Major Hub \u00b7 3 Connections',
-   serves:['Windsor\u2013Oshawa spine','Hamilton\u2013Kitchener branch','London corridor'],
+  {name:'Kitchener–Waterloo', coords:C.kitchener, tier:'major', r:12, dir:'left', proposed:false,
+   connections:3, sub:'Major Hub · 3 Connections', express:true,
+   serves:['Windsor–Oshawa spine','Hamilton–Kitchener branch','London corridor'],
    note:'University cluster. Tech corridor anchor. ION LRT interchange.',
    chatham:false,
    times:[
@@ -1071,11 +1213,11 @@ const stations = [
      ['Oshawa',           '1h 02m'],
    ]},
 
-  // ── OSHAWA (Regional · 2 connections) ──
+  // ── OSHAWA (Regional · 3 connections) ──
   {name:'Oshawa', coords:C.oshawa, tier:'regional', r:9, dir:'right', proposed:false,
-   connections:2, sub:'Regional \u00b7 2 Connections',
-   serves:['Windsor\u2013Oshawa spine','Project Alto (Peterborough\u2013Ottawa)'],
-   note:'Express stop and Alto interchange. Durham Region anchor.',
+   connections:3, sub:'Regional · 3 Connections', express:false,
+   serves:['Windsor–Oshawa spine','Project Alto (Peterborough–Ottawa)','Alto Alternate (Lakeshore to Montréal)'],
+   note:'Regional stop and Alto / Alto Alternate interchange. Durham Region anchor. Express trains skip Oshawa.',
    chatham:false,
    times:[
      ['Toronto Union',    '24m'],
@@ -1087,11 +1229,13 @@ const stations = [
      ['Windsor',          '2h 14m'],
      ['Peterborough (Alto)','~20m'],
      ['Ottawa (Alto)',    '~1h 25m'],
+     ['Kingston (Alto Alt)','~1h 00m'],
+     ['Montréal (Alto Alt)','~2h 09m'],
    ]},
 
   // ── LONDON (Regional · 2 connections) ──
   {name:'London', coords:C.london, tier:'regional', r:9, dir:'left', proposed:false,
-   connections:2, sub:'Regional \u00b7 2 Connections', serves:['Windsor\u2013Oshawa spine','Kitchener\u2013Windsor corridor'],
+   connections:2, sub:'Regional · 2 Connections', express:true, serves:['Windsor–Oshawa spine','Kitchener–Windsor corridor'],
    note:'Local rapid transit hub. Regional bus feeder to surrounding communities.',
    chatham:false,
    times:[
@@ -1104,9 +1248,9 @@ const stations = [
    ]},
 
   // ── CHATHAM (Regional · express skip — regional times) ──
-  {name:'Chatham', coords:C.chatham, tier:'regional', r:9, dir:'top', proposed:false, chatham:true,
-   connections:2, sub:'Regional \u00b7 Express Skip',
-   serves:['Windsor\u2013Oshawa spine'],
+  {name:'Chatham', coords:C.chatham, tier:'regional', r:9, dir:'top', proposed:false, chatham:true, express:false,
+   connections:2, sub:'Regional · Express Skip',
+   serves:['Windsor–Oshawa spine'],
    note:'Express trains do not stop here. All times below are regional service.',
    times:[
      ['Windsor',          '20m'],
@@ -1117,7 +1261,7 @@ const stations = [
 
   // ── WINDSOR (Regional · 1 connection) ──
   {name:'Windsor', coords:C.windsor, tier:'regional', r:9, dir:'left', proposed:false,
-   connections:1, sub:'Regional \u00b7 Western Terminus', serves:['Windsor\u2013Oshawa spine'],
+   connections:1, sub:'Regional · Western Terminus', express:true, serves:['Windsor–Oshawa spine'],
    note:'Cross-border connection to Detroit. Western anchor.',
    chatham:false,
    times:[
@@ -1131,7 +1275,7 @@ const stations = [
 
   // ── NIAGARA FALLS (Regional · 1 connection) ──
   {name:'Niagara Falls', coords:C.niagara, tier:'regional', r:9, dir:'bottom', proposed:false,
-   connections:1, sub:'Regional \u00b7 Southern Terminus', serves:['Toronto\u2013Niagara'],
+   connections:1, sub:'Regional · Southern Terminus', express:false, serves:['Toronto–Niagara'],
    note:'Tourism and cross-border traffic. Southern anchor.',
    chatham:false,
    times:[
@@ -1145,7 +1289,7 @@ const stations = [
 
   // ── BARRIE (Regional · 1 connection) ──
   {name:'Barrie', coords:C.barrie, tier:'regional', r:9, dir:'right', proposed:false,
-   connections:1, sub:'Regional \u00b7 Northern Terminus', serves:['Pearson\u2013Barrie'],
+   connections:1, sub:'Regional · Northern Terminus', express:false, serves:['Pearson–Barrie'],
    note:'Northern anchor. Simcoe County gateway.',
    chatham:false,
    times:[
@@ -1163,14 +1307,14 @@ const stations = [
 ────────────────────────────────────────────────────── */
 function stationPopup(s) {
   const servesHtml = s.serves.map(l=>`<div class="pu-row"><span class="k" style="color:#888">Serves</span><span class="v sm">${l}</span></div>`).join('');
-  const timesHtml  = s.times.map(([d,t])=>tRow(d,t)).join('');
+  const timesHtml  = s.times.map(([d,t])=>tRow(d,t, !!s.express && destIsExpress(d))).join('');
   const tierBadge  = s.tier==='core'
-    ? bdg('Core Hub \u00b7 '+s.connections+' Connections','#fee2e2','#991b1b','#fca5a5')
+    ? bdg('Core Hub · '+s.connections+' Connections','#fee2e2','#991b1b','#fca5a5')
     : s.tier==='major'
-    ? bdg('Major Hub \u00b7 '+s.connections+' Connections','#dbeafe','#1e40af','#93c5fd')
-    : bdg('Regional \u00b7 '+s.connections+' Connection'+(s.connections!==1?'s':''),'#f3f4f6','#374151','#d1d5db');
-  const propFlag   = s.proposed ? `<span class="pu-proposed">\u26a0 Proposed New Station</span><br>` : '';
-  const timeLabel  = s.chatham  ? '\u25ce Regional journey times' : '\u26a1 Express journey times';
+    ? bdg('Major Hub · '+s.connections+' Connections','#dbeafe','#1e40af','#93c5fd')
+    : bdg('Regional · '+s.connections+' Connection'+(s.connections!==1?'s':''),'#f3f4f6','#374151','#d1d5db');
+  const propFlag   = s.proposed ? `<span class="pu-proposed">⚠ Proposed New Station</span><br>` : '';
+  const timeLabel  = s.express ? '⚡ Express journey times' : '◎ Regional journey times';
 
   return `
     <div class="pu-title">${s.name}</div>
@@ -1237,13 +1381,13 @@ function toggleLegend() {
   const body = document.getElementById('legend-body');
   const btn  = document.getElementById('legend-toggle');
   body.style.display = legendOpen ? '' : 'none';
-  btn.textContent    = legendOpen ? '\u25BC' : '\u25B2';
+  btn.textContent    = legendOpen ? '▼' : '▲';
 }
 
 if (window.matchMedia('(max-width: 600px)').matches) {
   legendOpen = false;
   document.getElementById('legend-body').style.display = 'none';
-  document.getElementById('legend-toggle').textContent = '\u25B2';
+  document.getElementById('legend-toggle').textContent = '▲';
 }
 </script>
 </body>
