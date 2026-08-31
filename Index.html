@@ -893,10 +893,10 @@ const map = L.map('map', {
   zoomControl: true,
 });
 
-const CARTO_KEY = 'eyJhbGciOiJIUzI1NiJ9.eyJhIjoiYWNfd2UyNHY5dHMiLCJqdGkiOiJjYTljMWNjNyJ9.6tVUQUuN8Tg8i1s_1feMbJQVd5JZ4a--8nX_NGFW0Pw';
+const CARTO_KEY = ''; // basemap key from carto.com/basemaps/apikey — arrives by email
 
 L.tileLayer(
-  'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?api_key=' + CARTO_KEY,
+  'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=' + CARTO_KEY,
   {
     attribution:
       '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors ' +
